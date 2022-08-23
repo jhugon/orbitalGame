@@ -40,6 +40,21 @@ class Vec2:
         self.x = x
         self.y = y
 
+    def distance(self, other: "Vec2") -> float:
+        """
+        Distance between other and self
+        """
+        dx = self.x - other.x
+        dy = self.y - other.y
+        return sqrt(dx**2 + dy**2)
+
+    def isClose(self, other: "Vec2", distance: float) -> bool:
+        """
+        Is other within distance of self?
+        """
+        d = self.distance(other)
+        return d <= distance
+
     def rotate(self, angleDeg: float) -> None:
         """
         rotate this instance
@@ -79,19 +94,32 @@ class Vec2:
         self.y += other.y
         return self
 
-    def __mult__(self, sf: float) -> "Vec2":
+    def __mul__(self, sf: float) -> "Vec2":
         """
         Return this vector scaled by scale factor sf
         """
         return Vec2(self.x * sf, self.y * sf)
 
-    def __imult__(self, sf: float) -> "Vec2":
+    def __rmul__(self, sf: float) -> "Vec2":
+        """
+        Return this vector scaled by scale factor sf
+        """
+        return self * sf
+
+    def __imul__(self, sf: float) -> "Vec2":
         """
         Scale this vector by scale factor sf
         """
         self.x *= sf
         self.y *= sf
         return self
+
+    def __eq__(self, other) -> bool:
+        """
+        Equality of underlying coordinates
+        """
+        # return (self.x - other.x) < 1e-9 and (self.y - other.y) < 1e-9
+        return (self.x == other.x) and (self.y == other.y)
 
     def __str__(self) -> str:
         return f"Vec2({self.x},{self.y})"
