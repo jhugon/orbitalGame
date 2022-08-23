@@ -6,3 +6,10 @@ Orbital Game Enging in Python
 
 - pygame
 - imagemagick (specifically convert
+
+## Setting up for development
+
+    ```bash
+    pre-commit install
+    pre-commit install --hook-type commit-msg
+    ```
