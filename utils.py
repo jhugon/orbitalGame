@@ -79,6 +79,29 @@ class Vec2:
         """
         return self.x, self.y
 
+    def magnitude(self) -> float:
+        """
+        return sqrt(x**2+y**2)
+        """
+        return sqrt(self.x**2 + self.y**2)
+
+    def normalize(self) -> None:
+        """
+        normalizes this vector i.e. makes it's magnitude one
+        """
+        mag = self.magnitude()
+        self.x /= mag
+        self.y /= mag
+
+    def normalized(self) -> "Vec2":
+        """
+        returns a normalized version of this vector
+            i.e. same direction but magnitude one
+        """
+        result = Vec2(self.x, self.y)
+        result.normalize()
+        return result
+
     def __add__(self, other: "Vec2") -> "Vec2":
         """
         Vector addition == translation
