@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [v0.2.0](https://github.com/jhugon/orbitalGame/releases/tag/v0.2.0) - 2022-08-23
+
+- [`7bb7e88`](https://github.com/jhugon/orbitalGame/commit/7bb7e88f2ef4ea6d590cde6f718ebbf4daaced46) ci: added pytest to github ci action
+- [`4100fa9`](https://github.com/jhugon/orbitalGame/commit/4100fa99a1a7cabe07371f0baff5f2bee16afb88) feat: Vec2 added distance isclose __eq__ and unit tests
+- [`ea16889`](https://github.com/jhugon/orbitalGame/commit/ea168892ea90c107e70f590d508756a5106eb8f3) refactor: modify and type annotate Vec2
+
 ## [v0.1.2](https://github.com/jhugon/orbitalGame/releases/tag/v0.1.2) - 2022-08-23
 
 - [`a2ee02f`](https://github.com/jhugon/orbitalGame/commit/a2ee02f289e6e1fba8e7173ba7bf3b4b998dbb36) Merge pull request #4 from jhugon/multi-files
