@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [v0.1.1](https://github.com/jhugon/orbitalGame/releases/tag/v0.1.1) - 2022-08-23
+
+- [`cfb3974`](https://github.com/jhugon/orbitalGame/commit/cfb39746622c620a92d7622f597173593800b7ce) fix(CI): fix mypy GitHub action
+
 ## [v0.1.0](https://github.com/jhugon/orbitalGame/releases/tag/v0.1.0) - 2022-08-23
 
 - [`3b61df3`](https://github.com/jhugon/orbitalGame/commit/3b61df370e4186ad88e910b6d26416a262ad7b6f) feat: Added mypy CI and made code pass
