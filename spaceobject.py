@@ -142,13 +142,13 @@ class SpaceObjectView(pygame.sprite.Sprite):
             Vec2(w2, -l2),
             Vec2(-w2, 0),
         ]
-        position = Vec2(self.rect.w / 2 - arrowSize[0] / 2, 0)
-        position.rotate(rotation)
-        position.translate(self.rect.w / 2, self.rect.h / 2)
+        position = Vec2(self.rect.w / 2 - arrowSize[0] / 2, 0).rotated(rotation) + Vec2(
+            self.rect.w / 2, self.rect.h / 2
+        )
         for i in range(len(points)):
             points[i].rotate(rotation)
-            points[i].translate(position.x, position.y)
-        points = [i.tup() for i in points]
+            points[i] += position
+        points = [i.tuple() for i in points]
         pygame.draw.polygon(self.image, arrowColor, points)
 
     def deSelect(self):

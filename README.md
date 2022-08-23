@@ -13,3 +13,9 @@ Orbital Game Enging in Python
     pre-commit install
     pre-commit install --hook-type commit-msg
     ```
+
+## Running
+
+    ```bash
+    python engine.py
+    ```
