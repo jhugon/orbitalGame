@@ -3,8 +3,11 @@ Universe controlls all of the SpaceObjects
 """
 
 import pygame  # type: ignore
+from pygame.locals import *  # type: ignore
 from math import sqrt
 from copy import deepcopy
+
+from futurepaths import FuturePathsView
 
 
 class UniverseModel:

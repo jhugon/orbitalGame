@@ -2,8 +2,8 @@
 
 from math import sqrt
 import pygame  # type: ignore
-
-# from pygame.locals import *  # type: ignore
+from spaceobject import SpaceObjectCtrl
+from universe import UniverseCtrl
 
 
 class SpaceApplication:
