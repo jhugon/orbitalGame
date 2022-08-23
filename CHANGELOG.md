@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [v0.1.2](https://github.com/jhugon/orbitalGame/releases/tag/v0.1.2) - 2022-08-23
+
+- [`a2ee02f`](https://github.com/jhugon/orbitalGame/commit/a2ee02f289e6e1fba8e7173ba7bf3b4b998dbb36) Merge pull request #4 from jhugon/multi-files
+- [`822bec0`](https://github.com/jhugon/orbitalGame/commit/822bec0f4091bc5aa7541e71cab32f70f7923467) fix: fix imports now that multiple files
+- [`2e11162`](https://github.com/jhugon/orbitalGame/commit/2e1116298f0a60cb39ade7aeb9b59c86f4c9c2ad) ci: add mypy pre-commit hook
+- [`2370df2`](https://github.com/jhugon/orbitalGame/commit/2370df28a4e00f8565971dd3c1fac0452bbfb275) refactor: working on splitting into multi files
+
 ## [v0.1.1](https://github.com/jhugon/orbitalGame/releases/tag/v0.1.1) - 2022-08-23
 
 - [`cfb3974`](https://github.com/jhugon/orbitalGame/commit/cfb39746622c620a92d7622f597173593800b7ce) fix(CI): fix mypy GitHub action
