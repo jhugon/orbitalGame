@@ -8,8 +8,8 @@ import os.path
 import math
 from math import sqrt
 from copy import deepcopy
-import pygame
-from pygame.locals import *
+import pygame  # type: ignore
+from pygame.locals import *  # type: ignore
 
 if not pygame.font:
     print("Warning, fonts disabled")
