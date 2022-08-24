@@ -10,22 +10,21 @@ from typing import Optional, List, Any, Tuple
 
 from utils import Vec2
 from futurepaths import FuturePathsView
+from spaceobject import SpaceObjectModel, SpaceObjectCtrl, SpaceObjectView
 
 
 class UniverseModel:
-    def __init__(self, size, G=6.67e-11, rPower=-2.0):
+    def __init__(self, G: float = 6.67e-11, rPower: float = -2.0) -> None:
         """
-        size is the size of the universe in model units (meters)
         G is the gravitational constant
         rPower is the power of gravity, e.g. a = G*M*r^(rPower)
         """
-        self.size = size
-        self.massiveObjects = []
-        self.masslessObjects = []
-        self.G = G
-        self.rPower = rPower
+        self.massiveObjects: List[SpaceObjectModel] = []
+        self.masslessObjects: List[SpaceObjectModel] = []
+        self.G: float = G
+        self.rPower: float = rPower
 
-    def addObject(self, obj):
+    def addObject(self, obj: SpaceObjectModel) -> None:
         obj.universe = self
         if obj.mass > 0.0:
             self.massiveObjects += [obj]
@@ -44,22 +43,30 @@ class UniverseModel:
             acceleration += accfrommo
         return acceleration
 
-    def update(self, dt):
+    def update(self, dt: float) -> None:
         for obj in self.massiveObjects + self.masslessObjects:
             obj.update1(dt)
         for obj in self.massiveObjects + self.masslessObjects:
             obj.update2(dt)
 
-    def __str__(self):
+    def __str__(self) -> str:
         result = ""
         for obj in self.massiveObjects + self.masslessObjects:
             result += str(obj)
         return result
 
-    def getFuture(self, dtList, selectedObj=None, dtStepSize=1e2):  # in seconds
+    def getFuture(
+        self,
+        dtList: List[float],
+        selectedObj: Optional[SpaceObjectModel] = None,
+        dtStepSize: float = 1e2,
+    ) -> Tuple[List[List[Vec2]], List[List[float]]]:
+        """
+        dtStepSize is in model seconds, just like dtList
+        """
         futureUniverse = deepcopy(self)
         mlos = futureUniverse.masslessObjects
-        if selectedObj != None:
+        if selectedObj is not None:
             foundSelected = False
             mlosNew = []
             for obj in mlos:
@@ -74,8 +81,8 @@ class UniverseModel:
                 mlos.reverse()
             assert foundSelected
 
-        futurePositionList = [[] for i in mlos]
-        futureBurnList = [[] for i in mlos]
+        futurePositionList: List[List[Vec2]] = [[] for i in mlos]
+        futureBurnList: List[List[float]] = [[] for i in mlos]
         iDt = 0
         dtTotal = 0.0
         while True:
@@ -89,7 +96,7 @@ class UniverseModel:
             if recordThisStep:
                 for i in range(len(mlos)):
                     pos = mlos[i].kinematics.getPosition()
-                    futurePositionList[i] += [pos.tuple()]
+                    futurePositionList[i] += [pos]
                     burn = 0.0
                     for burnTime in mlos[i].burnSchedule:
                         if burnTime[0] <= 0.0:
@@ -99,13 +106,16 @@ class UniverseModel:
             dtTotal += dtStep
             if iDt >= len(dtList):
                 break
-        print(f"Current Selected {selectedObj.kinematics}")
+        if selectedObj is None:
+            print(f"Nothing Current Selected")
+        else:
+            print(f"Current Selected {selectedObj.kinematics}")
         print("Future Pos List: ")
         print(futurePositionList)
         for path in futurePositionList:
             print("  Path")
             for pos in path:
-                print(("   {0:6.2e} {1:6.2e}".format(*pos)))
+                print(("   {}".format(pos)))
         return futurePositionList, futureBurnList
 
 
@@ -197,10 +207,7 @@ class UniverseCtrl:
         self.updateModelEvery = 1e2  # seconds of model time
         self.dRClickPath = 25.0
 
-        convertCoordsModel2View = getattr(self, "convertCoordsModel2View")
-        convertCoordsView2Model = getattr(self, "convertCoordsView2Model")
-
-        self.model = UniverseModel(convertCoordsView2Model(*size))
+        self.model = UniverseModel()
         self.view = UniverseView(size, backgroundImageLoc)
         self.objects = []
 
@@ -221,8 +228,8 @@ class UniverseCtrl:
 
     def convertCoordsModel2View(self, x: float, y: float) -> Tuple[int, int]:
         return (
-            x // self.meterPerPixel + self.viewSize[0] // 2,
-            -y // self.meterPerPixel + self.viewSize[1] // 2,
+            int(x // self.meterPerPixel + self.viewSize[0] // 2),
+            int(-y // self.meterPerPixel + self.viewSize[1] // 2),
         )
 
     def convertCoordsView2Model(self, x: int, y: int) -> Tuple[float, float]:
@@ -353,8 +360,7 @@ class UniverseCtrl:
         for path in futurePaths:
             pathView = []
             for p in path:
-                pView = self.convertCoordsModel2View(*p)
-                pView = [int(i) for i in pView]
+                pView = self.convertCoordsModel2View(*p.tuple())
                 pathView += [pView]
             futurePathsView += [pathView]
         selected = True

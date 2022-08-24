@@ -84,6 +84,9 @@ class FuturePathsView(pygame.sprite.Sprite):
         print(f"  pointList: {pointList}")
         print(f"  burnList: {burnList}")
         print(f"  timeList: {timeList}")
+        assert len(pointList) == len(pointList)
+        if timeList is not None:
+            assert len(timeList) == len(burnList)
         style = self.pathStyle
         font = None
         if selected:
