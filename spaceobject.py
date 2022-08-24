@@ -12,7 +12,15 @@ from kinematics import ObjectKinematics
 
 
 class SpaceObjectModel:
+    """
+    Model the dynamics of a space object, especially using
+    ObjectKinematics in the kinematics attribute
+    """
+
     def __init__(self, position: Vec2, mass: float = 0.0) -> None:
+        """
+        position: the position in simulation (not pixel/window) coordinates
+        """
         self.kinematics: ObjectKinematics = ObjectKinematics(position, Vec2(0.0, 0.0))
         self.maxThrust: float = 1.0e-1  #  m/s^2
         self.thrust: float = (
@@ -27,6 +35,9 @@ class SpaceObjectModel:
         ] = []  # Each entry is a list [startTime,endTime,thrust]
 
     def update1(self, dt: float) -> None:
+        """
+        Updates the acceleration and some of thrust
+        """
         currentPos = self.kinematics.getPosition()
         newA = self.universe.getA(currentPos)
         newA += self.thrustVec
@@ -43,6 +54,9 @@ class SpaceObjectModel:
                 self.thrust = self.burnSchedule[iEntry][2]
 
     def update2(self, dt: float) -> None:
+        """
+        updates the position, velocity, and the rest of thrust
+        """
         self.kinematics.updatePosVel(dt)
         # Update Actual Thrust
         vNorm = Vec2(1.0, 0.0)  # in case velocity is 0.
@@ -54,6 +68,9 @@ class SpaceObjectModel:
     def scheduleBurn(
         self, startTime: float, endTime: float, thrustDirection: float
     ) -> None:
+        """
+        add a burn to the burn schedule
+        """
         self.burnSchedule += [[startTime, endTime, thrustDirection]]
 
     def __str__(self) -> str:
@@ -208,20 +225,31 @@ class SpaceObjectView(pygame.sprite.Sprite):
 
 
 class SpaceObjectCtrl:
-    def __init__(self, universe, img, scaleImg, x, y, mass=0.0):
+    def __init__(
+        self,
+        universe: Any,
+        image_filename: str,
+        scaleImg: float,
+        x: float,
+        y: float,
+        mass: float = 0.0,
+    ) -> None:
         """
-        x and y are in Model coords
+        x and y are in model/simulation coords, not screen/pixel/window coords
         """
         self.universe = universe
         self.x = x
         self.y = y
         viewX, viewY = self.universe.convertCoordsModel2View(x, y)
-        self.view = SpaceObjectView(img, scaleImg, viewX, viewY)
+        self.view = SpaceObjectView(image_filename, scaleImg, viewX, viewY)
         self.model = SpaceObjectModel(Vec2(x, y), mass)
         self.universe.addObject(self)
         self.selected = False
 
-    def updateViewToModel(self):
+    def updateViewToModel(self) -> None:
+        """
+        Update the view to match the model
+        """
         viewX, viewY = self.universe.convertCoordsModel2View(
             *self.model.kinematics.getPosition().tuple()
         )
@@ -229,11 +257,17 @@ class SpaceObjectCtrl:
         self.view.directionDeg = self.model.kinematics.getDirectionDeg()
         self.view.thrust = self.model.thrust
 
-    def select(self):
+    def select(self) -> None:
+        """
+        Select this object
+        """
         self.selected = True
         self.universe.selected += [self]
         self.view.select()
 
-    def scheduleBurn(self, startTime, endTime, thrust):
+    def scheduleBurn(self, startTime: float, endTime: float, thrust: float) -> None:
+        """
+        Add an entry to the burn schedule
+        """
         self.model.scheduleBurn(startTime, endTime, thrust)
         self.universe.showPaths()
