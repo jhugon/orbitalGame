@@ -29,9 +29,9 @@ class SpaceApplication:
         vehicle3 = SpaceObjectCtrl(
             universe, "sprites/FrigateMissile_cyan.png", 1.0, 0.0, -rVehicle
         )
-        vehicle.model.vy = vVehicle
-        vehicle2.model.vx = vVehicle
-        vehicle3.model.vx = -vVehicle
+        vehicle.model.kinematics.velocity.y = vVehicle
+        vehicle2.model.kinematics.velocity.x = vVehicle
+        vehicle3.model.kinematics.velocity.x = -vVehicle
 
         universe.run()
 

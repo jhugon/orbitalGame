@@ -6,31 +6,31 @@ import pygame  # type: ignore
 from math import sqrt
 from utils import load_image, Vec2
 import math
+from typing import Optional, List, Any
+
+from kinematics import ObjectKinematics
 
 
 class SpaceObjectModel:
-    def __init__(self, x, y, mass=0.0):
-        self.x = x  # Position
-        self.y = y  # Position
-        self.vx = 0.0
-        self.vy = 0.0
-        self.ax = 0.0
-        self.ay = 0.0
-        self.maxThrust = 1.0e-1  #  m/s^2
-        self.thrust = 0.0
-        self.tx = 0.0  #  m/s^2
-        self.ty = 0.0  #  m/s^2
-        self.m = mass
-        self.universe = None
+    def __init__(self, position: Vec2, mass: float = 0.0) -> None:
+        self.kinematics: ObjectKinematics = ObjectKinematics(position, Vec2(0.0, 0.0))
+        self.maxThrust: float = 1.0e-1  #  m/s^2
+        self.thrust: float = (
+            0.0  # I think this really acts as -1 0 or 1, and is multiplied by maxThrust
+        )
+        self.thrustVec: Vec2 = Vec2(0.0, 0.0)
+        self.mass: float = mass
+        self.universe: Any = None
 
-        self.burnSchedule = []  # Each entry is a list [startTime,endTime,thrust]
+        self.burnSchedule: List[
+            List[float]
+        ] = []  # Each entry is a list [startTime,endTime,thrust]
 
-    def update1(self, dt):
-        obj = self
-        # Update Acceleration
-        obj.ax, obj.ay = self.universe.getA(obj.x, obj.y)
-        obj.ax += obj.tx
-        obj.ay += obj.ty
+    def update1(self, dt: float) -> None:
+        currentPos = self.kinematics.getPosition()
+        newA = self.universe.getA(currentPos)
+        newA += self.thrustVec
+        self.kinematics.updateAcceleration(newA)
 
         # Update Thrust Control
         self.thrust = 0.0
@@ -42,37 +42,25 @@ class SpaceObjectModel:
             elif self.burnSchedule[iEntry][0] <= 0.0:
                 self.thrust = self.burnSchedule[iEntry][2]
 
-    def update2(self, dt):
-        obj = self
-        # Update Velocity
-        obj.vx += obj.ax * dt
-        obj.vy += obj.ay * dt
-
-        # Update Position
-        obj.x += obj.vx * dt
-        obj.y += obj.vy * dt
-        # print obj.x, obj.y
-
+    def update2(self, dt: float) -> None:
+        self.kinematics.updatePosVel(dt)
         # Update Actual Thrust
-        v = sqrt(obj.vx**2 + obj.vy**2)
-        vxNorm = 1.0
-        vyNorm = 0.0
-        if v > 0.0:
-            vxNorm = obj.vx / v
-            vyNorm = obj.vy / v
-        obj.tx = obj.thrust * vxNorm * obj.maxThrust
-        obj.ty = obj.thrust * vyNorm * obj.maxThrust
+        vNorm = Vec2(1.0, 0.0)  # in case velocity is 0.
+        vMag = self.kinematics.getVelocity().magnitude()
+        if vMag > 0.0:
+            vNorm = self.kinematics.getVelocity().normalized()
+        self.thrustVec = self.thrust * self.maxThrust * vNorm
 
-    def scheduleBurn(self, startTime, endTime, thrustDirection):
+    def scheduleBurn(self, startTime: float, endTime: float, thrustDirection: float):
         self.burnSchedule += [[startTime, endTime, thrustDirection]]
 
-    def __str__(self):
+    def __str__(self) -> str:
         result = ""
         m = 0.0
-        if self.m != None:
-            m = self.m
-        result = "m: {0:9.2e} p: ({1:9.2e},{2:9.2e}) v: ({3:9.2e},{4:9.2e}) a: ({5:9.2e},{6:9.2e})\n"
-        result = result.format(m, self.x, self.y, self.vx, self.vy, self.ax, self.ay)
+        if self.mass != None:
+            m = self.mass
+        result = "SpaceObjectModel: m: {0:9.2e} {}\n"
+        result = result.format(m, self.kinematics)
         for i in self.burnSchedule:
             result += "  burn start: {0:10.2e}s, end: {1:10.2e}s, direction: {2:5.2f}\n".format(
                 *i
@@ -180,15 +168,17 @@ class SpaceObjectCtrl:
         self.y = y
         viewX, viewY = self.universe.convertCoordsModel2View(x, y)
         self.view = SpaceObjectView(img, scaleImg, viewX, viewY)
-        self.model = SpaceObjectModel(x, y, mass)
+        self.model = SpaceObjectModel(Vec2(x, y), mass)
         self.universe.addObject(self)
         self.selected = False
 
     def updateViewToModel(self):
-        viewX, viewY = self.universe.convertCoordsModel2View(self.model.x, self.model.y)
+        viewX, viewY = self.universe.convertCoordsModel2View(
+            *self.model.kinematics.getPosition().tuple()
+        )
         self.view.setXY(viewX, viewY)
-        self.view.direction = math.atan2(-self.model.vy, self.model.vx)
-        self.view.directionDeg = math.degrees(self.view.direction)
+        self.view.direction = self.model.kinematics.getDirection()
+        self.view.directionDeg = self.model.kinematics.getDirectionDeg()
         self.view.thrust = self.model.thrust
 
     def select(self):

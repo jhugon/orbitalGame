@@ -7,6 +7,7 @@ from pygame.locals import *  # type: ignore
 from math import sqrt
 from copy import deepcopy
 
+from utils import Vec2
 from futurepaths import FuturePathsView
 
 
@@ -25,30 +26,22 @@ class UniverseModel:
 
     def addObject(self, obj):
         obj.universe = self
-        if obj.m > 0.0:
+        if obj.mass > 0.0:
             self.massiveObjects += [obj]
         else:
             self.masslessObjects += [obj]
 
-    def getA(self, x, y):
-        ax = 0.0
-        ay = 0.0
+    def getA(self, position: Vec2) -> Vec2:
+        acceleration = Vec2(0.0, 0.0)
         for mo in self.massiveObjects:
-            dx = mo.x - x
-            dy = mo.y - y
-            rSqr = dx**2 + dy**2
-            r = sqrt(rSqr)
+            rVec = mo.kinematics.getPosition() - position
+            r = rVec.magnitude()
             if r < 0.001:
                 continue
-            a = self.G * mo.m * r ** (self.rPower)
-            # print("mo.x: {:9.2e} mo.y: {:9.2e} x: {:9.2e} y: {:9.2e}".format(mo.x,mo.y,x,y))
-            # print("r: {:9.2e} rSqr: {:9.2e} dx: {:9.2e} dy: {:9.2e}".format(r,rSqr,dx,dy))
-            # print("a: {:9.2e} ax: {:9.2e} ay: {:9.2e} ".format(a,a*dx/r,a*dy/r))
-            # print("G: {:9.2e} rPower: {:9.2e} mo.m: {:9.2}".format(self.G,self.rPower,mo.m))
-            # print("2**(self.rPower): {:9.2e}".format(2.**(self.rPower)))
-            ax += a * dx / r
-            ay += a * dy / r
-        return ax, ay
+            accmagfrommo = self.G * mo.mass * r ** (self.rPower)
+            accfrommo = accmagfrommo * rVec.normalized()
+            acceleration += accfrommo
+        return acceleration
 
     def update(self, dt):
         for obj in self.massiveObjects + self.masslessObjects:
@@ -69,11 +62,10 @@ class UniverseModel:
             foundSelected = False
             mlosNew = []
             for obj in mlos:
-                if obj.x == selectedObj.x and obj.y == selectedObj.y:
-                    if obj.vx == selectedObj.vx and obj.vy == selectedObj.vy:
-                        selectedObj = obj
-                        foundSelected = True
-                        continue
+                if obj.kinematics == selectedObj.kinematics:
+                    selectedObj = obj
+                    foundSelected = True
+                    continue
                 mlosNew += [obj]
             mlos = mlosNew
             if foundSelected:
@@ -95,9 +87,8 @@ class UniverseModel:
             futureUniverse.update(dtStep)
             if recordThisStep:
                 for i in range(len(mlos)):
-                    x = mlos[i].x
-                    y = mlos[i].y
-                    futurePositionList[i] += [[x, y]]
+                    pos = mlos[i].kinematics.getPosition()
+                    futurePositionList[i] += [pos.tuple()]
                     burn = 0.0
                     for burnTime in mlos[i].burnSchedule:
                         if burnTime[0] <= 0.0:
@@ -107,7 +98,7 @@ class UniverseModel:
             dtTotal += dtStep
             if iDt >= len(dtList):
                 break
-        print(("Current Selected x,y: %6.2e %6.2e" % (selectedObj.x, selectedObj.y)))
+        print(f"Current Selected {selectedObj.kinematics}")
         print("Future Pos List: ")
         print(futurePositionList)
         for path in futurePositionList:
@@ -358,7 +349,7 @@ class UniverseCtrl:
         self.view.hudGroup.empty()
         timePoints = [i * 1e3 for i in range(30)]
         selectedModel = self.selected[0].model
-        if selectedModel == None or selectedModel.m > 0.0:
+        if selectedModel == None or selectedModel.mass > 0.0:
             selectedModel = None
         futurePaths, futureBurns = self.model.getFuture(
             timePoints, selectedObj=selectedModel
@@ -372,11 +363,11 @@ class UniverseCtrl:
                 pathView += [pView]
             futurePathsView += [pathView]
         selected = True
-        if selectedModel == None or selectedModel.m > 0.0:
+        if selectedModel == None or selectedModel.mass > 0.0:
             selected = False
         self.view.showPaths(futurePathsView, futureBurns, timePoints, selected=selected)
 
-        if selectedModel != None and selectedModel.m == 0.0:
+        if selectedModel != None and selectedModel.mass == 0.0:
             self.selectedPathPoints = futurePaths[0]
             self.selectedPathPointsView = futurePathsView[0]
             self.selectedPathTimes = timePoints

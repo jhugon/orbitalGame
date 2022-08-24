@@ -81,3 +81,11 @@ class ObjectKinematics:
 
     def __repr__(self) -> str:
         return str(self)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ObjectKinematics):
+            return NotImplemented
+        elif self.position == self.position and self.velocity == self.velocity:
+            return True
+        else:
+            return False

@@ -117,6 +117,21 @@ class Vec2:
         self.y += other.y
         return self
 
+    def __sub__(self, other: "Vec2") -> "Vec2":
+        """
+        Vector subtraction
+        """
+        return Vec2(self.x - other.x, self.y - other.y)
+
+    def __isub__(self, other: "Vec2") -> "Vec2":
+        """
+        Vector subtraction
+        In-place
+        """
+        self.x -= other.x
+        self.y -= other.y
+        return self
+
     def __mul__(self, sf: float) -> "Vec2":
         """
         Return this vector scaled by scale factor sf
@@ -141,7 +156,6 @@ class Vec2:
         """
         Equality of underlying coordinates
         """
-        # return (self.x - other.x) < 1e-9 and (self.y - other.y) < 1e-9
         return (self.x == other.x) and (self.y == other.y)
 
     def __str__(self) -> str:
