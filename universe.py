@@ -60,7 +60,7 @@ class UniverseModel:
         dtList: List[float],
         selectedObj: Optional[SpaceObjectModel] = None,
         dtStepSize: float = 1e2,
-    ) -> Tuple[List[List[Tuple[float, float]]], List[List[float]]]:
+    ) -> Tuple[List[List[Vec2]], List[List[float]]]:
         """
         dtStepSize is in model seconds, just like dtList
         """
@@ -81,7 +81,7 @@ class UniverseModel:
                 mlos.reverse()
             assert foundSelected
 
-        futurePositionList: List[List[Tuple[float, float]]] = [[] for i in mlos]
+        futurePositionList: List[List[Vec2]] = [[] for i in mlos]
         futureBurnList: List[List[float]] = [[] for i in mlos]
         iDt = 0
         dtTotal = 0.0
@@ -96,7 +96,7 @@ class UniverseModel:
             if recordThisStep:
                 for i in range(len(mlos)):
                     pos = mlos[i].kinematics.getPosition()
-                    futurePositionList[i] += [pos.tuple()]
+                    futurePositionList[i] += [pos]
                     burn = 0.0
                     for burnTime in mlos[i].burnSchedule:
                         if burnTime[0] <= 0.0:
@@ -115,7 +115,7 @@ class UniverseModel:
         for path in futurePositionList:
             print("  Path")
             for p in path:
-                print(("   {0:6.2e} {1:6.2e}".format(*p)))
+                print(("   {}".format(p)))
         return futurePositionList, futureBurnList
 
 
@@ -216,7 +216,6 @@ class UniverseCtrl:
         self.pauseModel = False
         self.selectedModeFlag = False
 
-        self.selectedPathPoints = None
         self.selectedPathPointsView = None
         self.selectedPathTimes = None
         self.selectedBurnStartIndex = None
@@ -342,12 +341,11 @@ class UniverseCtrl:
         self.view.deselectAll()
         self.view.hudGroup.empty()
         self.selected = []
-        self.selectedPathPoints = None
         self.selectedPathPointsView = None
         self.selectedPathTimes = None
         self.selectedBurnStartIndex = None
 
-    def showPaths(self):
+    def showPaths(self) -> None:
         self.view.hudGroup.empty()
         timePoints = [i * 1e3 for i in range(30)]
         selectedModel = self.selected[0].model
@@ -356,12 +354,11 @@ class UniverseCtrl:
         futurePaths, futureBurns = self.model.getFuture(
             timePoints, selectedObj=selectedModel
         )
-        futurePathsView = []
+        futurePathsView: List[List[Tuple[int, int]]] = []
         for path in futurePaths:
-            pathView = []
+            pathView: List[Tuple[int, int]] = []
             for p in path:
-                pView = self.convertCoordsModel2View(*p)
-                pView = [int(i) for i in pView]
+                pView = self.convertCoordsModel2View(*(p.tuple()))
                 pathView += [pView]
             futurePathsView += [pathView]
         selected = True
@@ -370,7 +367,6 @@ class UniverseCtrl:
         self.view.showPaths(futurePathsView, futureBurns, timePoints, selected=selected)
 
         if selectedModel != None and selectedModel.mass == 0.0:
-            self.selectedPathPoints = futurePaths[0]
             self.selectedPathPointsView = futurePathsView[0]
             self.selectedPathTimes = timePoints
 
