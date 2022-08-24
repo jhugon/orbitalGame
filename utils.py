@@ -1,26 +1,29 @@
+"""
+Utility and general-use functions/classes
+"""
+
 import pygame  # type: ignore
+from pygame.locals import RLEACCEL  # type: ignore
 import math
 from math import sqrt
 import os.path
-from typing import Dict, Tuple, Optional
+from typing import Tuple, Optional
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 sprites_dir = os.path.join(main_dir, "sprites")
 
 
-def load_image(name, colorkey=None):
-    # fullname = os.path.join(sprites_dir, name)
-    fullname = name
+def load_image(image_filename: str) -> Tuple[pygame.Surface, pygame.Rect]:
+    """
+    Load image from image_filename into pygame objects
+    Converts the image to use alpha transparancy
+    """
     try:
-        image = pygame.image.load(fullname)
+        image = pygame.image.load(image_filename)
     except pygame.error as e:
-        print(("Cannot load image:", fullname))
+        print(("Cannot load image:", image_filename))
         raise SystemExit(e)
     image = image.convert_alpha()
-    if colorkey is not None:
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey, RLEACCEL)
     return image, image.get_rect()
 
 
