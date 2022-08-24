@@ -13,7 +13,7 @@ main_dir = os.path.split(os.path.abspath(__file__))[0]
 sprites_dir = os.path.join(main_dir, "sprites")
 
 
-def load_image(image_filename: str) -> Tuple[pygame.Surface, pygame.Rect]:
+def load_image(image_filename: str) -> Tuple[pygame.surface.Surface, pygame.rect.Rect]:
     """
     Load image from image_filename into pygame objects
     Converts the image to use alpha transparancy

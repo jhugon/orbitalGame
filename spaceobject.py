@@ -51,7 +51,9 @@ class SpaceObjectModel:
             vNorm = self.kinematics.getVelocity().normalized()
         self.thrustVec = self.thrust * self.maxThrust * vNorm
 
-    def scheduleBurn(self, startTime: float, endTime: float, thrustDirection: float):
+    def scheduleBurn(
+        self, startTime: float, endTime: float, thrustDirection: float
+    ) -> None:
         self.burnSchedule += [[startTime, endTime, thrustDirection]]
 
     def __str__(self) -> str:
@@ -69,17 +71,17 @@ class SpaceObjectModel:
 
 
 class SpaceObjectView(pygame.sprite.Sprite):
-    image: pygame.Surface
-    rect: pygame.Rect
+    image: pygame.surface.Surface
+    rect: pygame.rect.Rect
     direction: float
     directionDeg: float
     thrust: float
     thrustDrawn: bool
-    imageOrig: pygame.Surface
+    imageOrig: pygame.surface.Surface
     selected: bool
     universe: Any
 
-    def __init__(self, img: str, scaleImg: float, x: float, y: float) -> None:
+    def __init__(self, img: str, scaleImg: float, x: int, y: int) -> None:
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = self._setup_sprite(img, scaleImg, x, y)
         self.setXY(x, y)
@@ -93,19 +95,19 @@ class SpaceObjectView(pygame.sprite.Sprite):
 
     def _setup_sprite(
         self, img: str, scaleImg: float, x: float, y: float
-    ) -> Tuple[pygame.Surface, pygame.Rect]:
+    ) -> Tuple[pygame.surface.Surface, pygame.rect.Rect]:
         """
         Loads image into a surface and rect
         The image is scaled up by scale factor scaleImage
             and a border is expanded so a box can be drawn when selected
         """
         loadedImage, loadedRect = load_image(img)
-        loadedRect.w = loadedRect.w * scaleImg
-        loadedRect.h = loadedRect.h * scaleImg
+        loadedRect.w = int(loadedRect.w * scaleImg)
+        loadedRect.h = int(loadedRect.h * scaleImg)
         loadedImage = pygame.transform.smoothscale(loadedImage, loadedRect.size)
         ## Inflate the size of the rect so that a border can be drawn around the object
         rect = pygame.Rect(loadedRect)
-        rect.inflate_ip(loadedRect.w / 3, loadedRect.h / 3)
+        rect.inflate_ip(loadedRect.w // 3, loadedRect.h // 3)
         rect.x = 0
         rect.y = 0
         loadedRect.centerx = rect.centerx
@@ -121,7 +123,7 @@ class SpaceObjectView(pygame.sprite.Sprite):
         """
         self.universe = universe
 
-    def setXY(self, x: float, y: float) -> None:
+    def setXY(self, x: int, y: int) -> None:
         """
         Set the X-Y position of this object, in pixel space
         """
@@ -144,8 +146,8 @@ class SpaceObjectView(pygame.sprite.Sprite):
         innerRect = pygame.Rect(self.rect)
         innerRect.w = innerRect.w - 4
         innerRect.h = innerRect.h - 4
-        innerRect.centerx = self.rect.w / 2
-        innerRect.centery = self.rect.h / 2
+        innerRect.centerx = self.rect.w // 2
+        innerRect.centery = self.rect.h // 2
         # innerRect.y = 0
         # innerRect.inflate(-innerRect.w/4,-innerRect.w/4)
         self.image.fill((255, 255, 255, 0), innerRect)

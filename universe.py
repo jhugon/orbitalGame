@@ -6,6 +6,7 @@ import pygame  # type: ignore
 from pygame.locals import *  # type: ignore
 from math import sqrt
 from copy import deepcopy
+from typing import Optional, List, Any, Tuple
 
 from utils import Vec2
 from futurepaths import FuturePathsView
@@ -222,13 +223,13 @@ class UniverseCtrl:
         self.model.addObject(obj.model)
         self.view.addObject(obj.view)
 
-    def convertCoordsModel2View(self, x, y):
+    def convertCoordsModel2View(self, x: float, y: float) -> Tuple[int, int]:
         return (
-            x / self.meterPerPixel + self.viewSize[0] / 2,
-            -y / self.meterPerPixel + self.viewSize[1] / 2,
+            x // self.meterPerPixel + self.viewSize[0] // 2,
+            -y // self.meterPerPixel + self.viewSize[1] // 2,
         )
 
-    def convertCoordsView2Model(self, x, y):
+    def convertCoordsView2Model(self, x: int, y: int) -> Tuple[float, float]:
         return (x - self.viewSize[0] / 2) * self.meterPerPixel, (
             y - self.viewSize[1] / 2
         ) * self.meterPerPixel
