@@ -79,6 +79,29 @@ class Vec2:
         """
         return self.x, self.y
 
+    def magnitude(self) -> float:
+        """
+        return sqrt(x**2+y**2)
+        """
+        return sqrt(self.x**2 + self.y**2)
+
+    def normalize(self) -> None:
+        """
+        normalizes this vector i.e. makes it's magnitude one
+        """
+        mag = self.magnitude()
+        self.x /= mag
+        self.y /= mag
+
+    def normalized(self) -> "Vec2":
+        """
+        returns a normalized version of this vector
+            i.e. same direction but magnitude one
+        """
+        result = Vec2(self.x, self.y)
+        result.normalize()
+        return result
+
     def __add__(self, other: "Vec2") -> "Vec2":
         """
         Vector addition == translation
@@ -92,6 +115,21 @@ class Vec2:
         """
         self.x += other.x
         self.y += other.y
+        return self
+
+    def __sub__(self, other: "Vec2") -> "Vec2":
+        """
+        Vector subtraction
+        """
+        return Vec2(self.x - other.x, self.y - other.y)
+
+    def __isub__(self, other: "Vec2") -> "Vec2":
+        """
+        Vector subtraction
+        In-place
+        """
+        self.x -= other.x
+        self.y -= other.y
         return self
 
     def __mul__(self, sf: float) -> "Vec2":
@@ -118,7 +156,6 @@ class Vec2:
         """
         Equality of underlying coordinates
         """
-        # return (self.x - other.x) < 1e-9 and (self.y - other.y) < 1e-9
         return (self.x == other.x) and (self.y == other.y)
 
     def __str__(self) -> str:

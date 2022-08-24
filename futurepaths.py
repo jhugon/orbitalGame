@@ -79,6 +79,11 @@ class FuturePathsView(pygame.sprite.Sprite):
         )
 
     def addPath(self, selected, pointList, burnList, timeList=None):
+        print("addPath starting:")
+        print(f"  selected: {selected}")
+        print(f"  pointList: {pointList}")
+        print(f"  burnList: {burnList}")
+        print(f"  timeList: {timeList}")
         style = self.pathStyle
         font = None
         if selected:

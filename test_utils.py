@@ -82,3 +82,15 @@ class Test_Vec2:
         assert v5m3.rotated(90).isClose(Vec2(3.0, 5.0), 1e-9)
         assert v5m3.rotated(-90).isClose(Vec2(-3.0, -5.0), 1e-9)
         assert v5m3.rotated(0).isClose(v5m3, 1e-9)
+
+    def test_magnitude(self):
+        v5m3 = Vec2(5.0, -3.0)
+        assert v5m3.magnitude() == sqrt(25 + 9)
+        assert Vec2(50, 0).magnitude() == 50.0
+        assert Vec2(0.0, 23).magnitude() == 23.0
+
+    def test_normalized(self):
+        v5m3 = Vec2(5.0, -3.0)
+        assert v5m3.normalized() == v5m3 * (1.0 / sqrt(25 + 9))
+        assert Vec2(50, 0).normalized() == Vec2(1.0, 0.0)
+        assert Vec2(0.0, 23).normalized() == Vec2(0.0, 1.0)
