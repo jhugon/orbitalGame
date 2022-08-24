@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [v0.2.2](https://github.com/jhugon/orbitalGame/releases/tag/v0.2.2) - 2022-08-24
+
+- [`2bf59eb`](https://github.com/jhugon/orbitalGame/commit/2bf59ebb4d878538c9d594527c6c742b785a2857) Merge pull request #9 from jhugon/spaceobjectviewrefactor
+- [`e5979e7`](https://github.com/jhugon/orbitalGame/commit/e5979e7c2e4b4e6eb16bfe6051a1279774b223e2) chore: update CHANGELOG with comments about #9
+- [`5f5d9c9`](https://github.com/jhugon/orbitalGame/commit/5f5d9c941a35c5598b2f6284aa223e0acf4a71d7) refactor(spaceobject): finish adding annotations and comments to file
+- [`60f06bf`](https://github.com/jhugon/orbitalGame/commit/60f06bf35c277ca2c567f328f33bea2ebe2ee88d) refactor: thrustDirection -> drawFlame and clearer
+- [`d7303ef`](https://github.com/jhugon/orbitalGame/commit/d7303ef5a061e1e83f3a99c73a2b3c2e07f73abd) fix: errors in latest version of mypy
+- [`f761e15`](https://github.com/jhugon/orbitalGame/commit/f761e157894b62865d30374b4b2256e388c4f2b0) ci: now only runs on pull_reqs and pushes to main
+- [`c3e0ee0`](https://github.com/jhugon/orbitalGame/commit/c3e0ee06ef2bfc0d068aba420262aa14dd82b462) fix: SpaceObjectView.update type didnt match Sprite
+- [`9466a34`](https://github.com/jhugon/orbitalGame/commit/9466a34ccc99aba1288e5b185d5b87dedefb0f09) refactor: SpaceObjectView prepare image/rect in seperate method
+
 Finished refactoring classes in spaceobject, the SpaceObjectView constructor is
 much more comprehensible, in particular.
 
