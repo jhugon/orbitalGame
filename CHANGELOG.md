@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+Finished refactoring classes in spaceobject, the SpaceObjectView constructor is
+much more comprehensible, in particular.
+
 ## [v0.2.1](https://github.com/jhugon/orbitalGame/releases/tag/v0.2.1) - 2022-08-24
 
 - [`fe31762`](https://github.com/jhugon/orbitalGame/commit/fe31762b859d85b69404ce97783d469de38d2086) Merge pull request #6 from jhugon/KinematicsModel
