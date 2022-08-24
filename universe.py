@@ -166,10 +166,6 @@ class UniverseView(pygame.Surface):
             pygame.display.update(self.toUpdateRectsList)
         self.toUpdateRectsList = []
 
-    def preUpdate(self):
-        for obj in self.selected:
-            obj.preUpdate()
-
     def deselectAll(self):
         for obj in self.objects:
             obj.deSelect()
@@ -251,8 +247,6 @@ class UniverseCtrl:
                     print(("fps: {0}".format(clock.get_fps())))
                     print((self.model))
                 counter = 0.0
-
-            self.view.preUpdate()
 
             # Handle Input Events
             for event in pygame.event.get():

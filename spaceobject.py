@@ -71,9 +71,14 @@ class SpaceObjectModel:
 
 
 class SpaceObjectView(pygame.sprite.Sprite):
+    """
+    Handles the actual sprite in the game window, as well
+    as drawing a flame while thrusting
+    """
+
+    # These are the main variables pygame sees
     image: pygame.surface.Surface
     rect: pygame.rect.Rect
-    direction: float
     directionDeg: float
     thrust: float
     thrustDrawn: bool
@@ -82,10 +87,14 @@ class SpaceObjectView(pygame.sprite.Sprite):
     universe: Any
 
     def __init__(self, img: str, scaleImg: float, x: int, y: int) -> None:
+        """
+        img: path to an image file
+        scaleImg: scale factor to use on image file
+        x, y: initial x, y position in pixel coordinates
+        """
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = self._setup_sprite(img, scaleImg, x, y)
         self.setXY(x, y)
-        self.direction = 0.0
         self.directionDeg = 0.0
         self.thrust = 0.0
         self.thrustDrawn = False
@@ -148,31 +157,33 @@ class SpaceObjectView(pygame.sprite.Sprite):
         innerRect.h = innerRect.h - 4
         innerRect.centerx = self.rect.w // 2
         innerRect.centery = self.rect.h // 2
-        # innerRect.y = 0
-        # innerRect.inflate(-innerRect.w/4,-innerRect.w/4)
         self.image.fill((255, 255, 255, 0), innerRect)
         self.image.blit(self.imageOrig, (0, 0))
 
-    def drawDirection(self) -> None:
-        arrowSize = (12, 12)
-        arrowColor = (255, 200, 0, 255)
-        w2 = arrowSize[0] / 2
-        l2 = arrowSize[1] / 2
+    def drawThrustFlame(self) -> None:
+        """
+        Draws a little flame indicating an object is thrusting and in which direction
+        """
+        flameSize = (12, 12)
+        flameColor = (255, 200, 0, 255)
+        w2 = flameSize[0] / 2
+        l2 = flameSize[1] / 2
         rotation = self.directionDeg
         if self.thrust > 0.0:
             rotation += 180.0
+        ## Drawing a triangle
         points = [
             Vec2(w2, l2),
             Vec2(w2, -l2),
             Vec2(-w2, 0),
         ]
-        position = Vec2(self.rect.w / 2 - arrowSize[0] / 2, 0).rotated(rotation) + Vec2(
+        position = Vec2(self.rect.w / 2 - flameSize[0] / 2, 0).rotated(rotation) + Vec2(
             self.rect.w / 2, self.rect.h / 2
         )
         for i in range(len(points)):
             points[i].rotate(rotation)
             points[i] += position
-        pygame.draw.polygon(self.image, arrowColor, [i.tuple() for i in points])
+        pygame.draw.polygon(self.image, flameColor, [i.tuple() for i in points])
 
     def deSelect(self) -> None:
         """
@@ -181,9 +192,6 @@ class SpaceObjectView(pygame.sprite.Sprite):
         self.selected = False
         self.image = self.imageOrig.copy()
 
-    def preUpdate(self) -> None:
-        pass
-
     def update(self, *args: Any, **kwargs: Any) -> None:
         """
         Update this image by drawing thrust cone
@@ -191,7 +199,7 @@ class SpaceObjectView(pygame.sprite.Sprite):
         if self.thrust != 0.0:
             self.image.fill((0, 0, 0, 0))
             self.image.blit(self.imageOrig, (0, 0))
-            self.drawDirection()
+            self.drawThrustFlame()
             self.thrustDrawn = True
         elif self.thrustDrawn:
             self.image.fill((0, 0, 0, 0))
@@ -218,7 +226,6 @@ class SpaceObjectCtrl:
             *self.model.kinematics.getPosition().tuple()
         )
         self.view.setXY(viewX, viewY)
-        self.view.direction = self.model.kinematics.getDirection()
         self.view.directionDeg = self.model.kinematics.getDirectionDeg()
         self.view.thrust = self.model.thrust
 
