@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [v0.2.1](https://github.com/jhugon/orbitalGame/releases/tag/v0.2.1) - 2022-08-24
+
+- [`fe31762`](https://github.com/jhugon/orbitalGame/commit/fe31762b859d85b69404ce97783d469de38d2086) Merge pull request #6 from jhugon/KinematicsModel
+- [`7319782`](https://github.com/jhugon/orbitalGame/commit/7319782355913ed326a324719b961c9c97a00624) fix: now future paths work again, kinematic == fixed
+- [`a457b02`](https://github.com/jhugon/orbitalGame/commit/a457b023579de31167fcc370664b5ee840a3d111) refactor: SpaceObjectModel uses kinematic class now
+- [`5854e96`](https://github.com/jhugon/orbitalGame/commit/5854e969ebe72ef343c2623768ab99bdc3b99190) refactor: added tests for kinematics.py
+- [`92c79b2`](https://github.com/jhugon/orbitalGame/commit/92c79b23a195b296f6e43d32260909e077d1d329) refactor: add kinematics.py
+
 ## [v0.2.0](https://github.com/jhugon/orbitalGame/releases/tag/v0.2.0) - 2022-08-23
 
 - [`7bb7e88`](https://github.com/jhugon/orbitalGame/commit/7bb7e88f2ef4ea6d590cde6f718ebbf4daaced46) ci: added pytest to github ci action
