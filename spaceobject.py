@@ -182,7 +182,7 @@ class SpaceObjectView(pygame.sprite.Sprite):
     def preUpdate(self) -> None:
         pass
 
-    def update(self) -> None:
+    def update(self, *args: Any, **kwargs: Any) -> None:
         """
         Update this image by drawing thrust cone
         """
