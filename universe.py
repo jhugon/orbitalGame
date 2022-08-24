@@ -60,7 +60,7 @@ class UniverseModel:
         dtList: List[float],
         selectedObj: Optional[SpaceObjectModel] = None,
         dtStepSize: float = 1e2,
-    ) -> Tuple[List[List[Vec2]], List[List[float]]]:
+    ) -> Tuple[List[List[Tuple[float, float]]], List[List[float]]]:
         """
         dtStepSize is in model seconds, just like dtList
         """
@@ -68,7 +68,7 @@ class UniverseModel:
         mlos = futureUniverse.masslessObjects
         if selectedObj is not None:
             foundSelected = False
-            mlosNew = []
+            mlosNew: List[SpaceObjectModel] = []
             for obj in mlos:
                 if obj.kinematics == selectedObj.kinematics:
                     selectedObj = obj
@@ -81,7 +81,7 @@ class UniverseModel:
                 mlos.reverse()
             assert foundSelected
 
-        futurePositionList: List[List[Vec2]] = [[] for i in mlos]
+        futurePositionList: List[List[Tuple[float, float]]] = [[] for i in mlos]
         futureBurnList: List[List[float]] = [[] for i in mlos]
         iDt = 0
         dtTotal = 0.0
@@ -96,7 +96,7 @@ class UniverseModel:
             if recordThisStep:
                 for i in range(len(mlos)):
                     pos = mlos[i].kinematics.getPosition()
-                    futurePositionList[i] += [pos]
+                    futurePositionList[i] += [pos.tuple()]
                     burn = 0.0
                     for burnTime in mlos[i].burnSchedule:
                         if burnTime[0] <= 0.0:
@@ -114,8 +114,8 @@ class UniverseModel:
         print(futurePositionList)
         for path in futurePositionList:
             print("  Path")
-            for pos in path:
-                print(("   {}".format(pos)))
+            for p in path:
+                print(("   {0:6.2e} {1:6.2e}".format(*p)))
         return futurePositionList, futureBurnList
 
 
@@ -360,7 +360,8 @@ class UniverseCtrl:
         for path in futurePaths:
             pathView = []
             for p in path:
-                pView = self.convertCoordsModel2View(*p.tuple())
+                pView = self.convertCoordsModel2View(*p)
+                pView = [int(i) for i in pView]
                 pathView += [pView]
             futurePathsView += [pathView]
         selected = True
