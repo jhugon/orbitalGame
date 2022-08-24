@@ -85,7 +85,7 @@ class ObjectKinematics:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ObjectKinematics):
             return NotImplemented
-        elif self.position == self.position and self.velocity == self.velocity:
+        elif self.position == other.position and self.velocity == other.velocity:
             return True
         else:
             return False
