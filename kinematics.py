@@ -27,19 +27,19 @@ class ObjectKinematics:
         """
         Object position
         """
-        return self.position
+        return self.position.copy()
 
     def getVelocity(self) -> Vec2:
         """
         Object velocity
         """
-        return self.velocity
+        return self.velocity.copy()
 
     def getAcceleration(self) -> Vec2:
         """
         Object acceleration
         """
-        return self.acceleration
+        return self.acceleration.copy()
 
     def getDirection(self) -> float:
         """
