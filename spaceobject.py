@@ -6,9 +6,12 @@ import pygame  # type: ignore
 from math import sqrt
 from utils import load_image, Vec2
 import math
-from typing import Optional, List, Any, Tuple
+from typing import Optional, List, Any, Tuple, TYPE_CHECKING
 
 from kinematics import ObjectKinematics
+
+if TYPE_CHECKING:
+    from universe import UniverseModel, UniverseView, UniverseCtrl
 
 
 class SpaceObjectModel:
@@ -28,7 +31,7 @@ class SpaceObjectModel:
         )
         self.thrustVec: Vec2 = Vec2(0.0, 0.0)
         self.mass: float = mass
-        self.universe: Any = None
+        self.universe: Optional[UniverseModel] = None
 
         self.burnSchedule: List[
             List[float]
@@ -38,6 +41,8 @@ class SpaceObjectModel:
         """
         Updates the acceleration and some of thrust
         """
+        if self.universe is None:
+            raise ValueError("self.universe hasn't yet been assigned")
         currentPos = self.kinematics.getPosition()
         newA = self.universe.getA(currentPos)
         newA += self.thrustVec
@@ -101,7 +106,7 @@ class SpaceObjectView(pygame.sprite.Sprite):
     thrustDrawn: bool
     imageOrig: pygame.surface.Surface
     selected: bool
-    universe: Any
+    universe: Optional["UniverseView"]
 
     def __init__(self, img: str, scaleImg: float, x: int, y: int) -> None:
         """
@@ -143,7 +148,7 @@ class SpaceObjectView(pygame.sprite.Sprite):
         image.blit(loadedImage, loadedRect)
         return image, rect
 
-    def setUniverse(self, universe: Any) -> None:
+    def setUniverse(self, universe: "UniverseView") -> None:
         """
         Set the UniverseView containing this SpaceObjectView
         """
@@ -166,6 +171,8 @@ class SpaceObjectView(pygame.sprite.Sprite):
         """
         Set this object as selected, and draw a border around it to show that
         """
+        if self.universe is None:
+            raise ValueError("self.universe hasn't yet been assigned")
         self.selected = True
         self.universe.selected.add(self)
         self.image.fill((255, 255, 255, 255))
@@ -227,7 +234,7 @@ class SpaceObjectView(pygame.sprite.Sprite):
 class SpaceObjectCtrl:
     def __init__(
         self,
-        universe: Any,
+        universe: "UniverseCtrl",
         image_filename: str,
         scaleImg: float,
         x: float,
@@ -237,14 +244,16 @@ class SpaceObjectCtrl:
         """
         x and y are in model/simulation coords, not screen/pixel/window coords
         """
-        self.universe = universe
-        self.x = x
-        self.y = y
+        self.universe: UniverseCtrl = universe
+        self.x: float = x
+        self.y: float = y
         viewX, viewY = self.universe.convertCoordsModel2View(x, y)
-        self.view = SpaceObjectView(image_filename, scaleImg, viewX, viewY)
-        self.model = SpaceObjectModel(Vec2(x, y), mass)
+        self.view: SpaceObjectView = SpaceObjectView(
+            image_filename, scaleImg, viewX, viewY
+        )
+        self.model: SpaceObjectModel = SpaceObjectModel(Vec2(x, y), mass)
         self.universe.addObject(self)
-        self.selected = False
+        self.selected: bool = False
 
     def updateViewToModel(self) -> None:
         """
