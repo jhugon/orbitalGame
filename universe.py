@@ -110,12 +110,6 @@ class UniverseModel:
             print(f"Nothing Current Selected")
         else:
             print(f"Current Selected {selectedObj.kinematics}")
-        print("Future Pos List: ")
-        print(futurePositionList)
-        for path in futurePositionList:
-            print("  Path")
-            for p in path:
-                print(("   {}".format(p)))
         return futurePositionList, futureBurnList
 
 
