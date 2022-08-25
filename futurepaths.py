@@ -1,76 +1,88 @@
 import pygame  # type: ignore
 import math
+from dataclasses import dataclass
+from typing import Optional, Tuple, List, Any, TYPE_CHECKING, TypedDict
+
+if TYPE_CHECKING:
+    from universe import UniverseView
+
+
+@dataclass
+class PathStyle:
+    """
+    Configuration options for path styles
+    """
+
+    color: Tuple[int, int, int, int] = (255, 255, 255, 100)
+    textcolor: Tuple[int, int, int, int] = (0, 0, 0, 100)
+    textbakcolor: Tuple[int, int, int, int] = (255, 255, 255, 100)
+    width: int = 1
+    textsize: int = 24
+    showTimes: bool = False
+    arrowWidth: int = 8
+    arrowLength: int = 8
+    arrowColor: Tuple[int, int, int, int] = (255, 255, 255, 100)
 
 
 class FuturePathsView(pygame.sprite.Sprite):
-    def __init__(self, universeView):
+    def __init__(self, universeView: "UniverseView") -> None:
         pygame.sprite.Sprite.__init__(self)
-        self.universe = universeView
-        self.image = pygame.Surface(self.universe.size).convert_alpha()
+        self.universe: "UniverseView" = universeView
+        self.image: pygame.surface.Surface = pygame.Surface(
+            self.universe.size
+        ).convert_alpha()
         self.image.fill((0, 0, 0, 0))
-        self.rect = pygame.Rect((0, 0), self.universe.size)
+        self.rect: pygame.rect.Rect = pygame.Rect((0, 0), self.universe.size)
         self.universe.hudGroup.add(self)
 
-        self.pathSelectedStyle = {
-            "color": (255, 255, 0, 255),
-            "textcolor": (0, 0, 0, 255),
-            "textbakcolor": (0, 255, 0, 255),
-            "width": 2,
-            "textsize": 24,
-            "showTimes": False,
-            "arrowWidth": 8,
-            "arrowLength": 8,
-            "arrowColor": (255, 255, 0, 255),
-        }
-        self.pathStyle = {
-            "color": (255, 255, 255, 100),
-            "textcolor": (0, 0, 0, 100),
-            "textbakcolor": (255, 255, 255, 100),
-            "width": 1,
-            "textsize": 24,
-            "showTimes": False,
-            "arrowWidth": 8,
-            "arrowLength": 8,
-            "arrowColor": (255, 255, 255, 100),
-        }
-
-        self.font = None
-        self.selectedFont = None
-        if pygame.font:
-            self.font = pygame.font.Font(None, self.pathStyle["textsize"])
-            self.selectedFont = pygame.font.Font(
-                None, self.pathSelectedStyle["textsize"]
-            )
-        maxArrowAxis = max(
-            self.pathSelectedStyle["arrowLength"], self.pathSelectedStyle["arrowWidth"]
+        self.pathStyle: PathStyle = PathStyle()
+        self.pathSelectedStyle: PathStyle = PathStyle(
+            color=(255, 255, 0, 255),
+            textcolor=(0, 0, 0, 255),
+            textbakcolor=(0, 255, 0, 255),
+            width=2,
+            arrowColor=(255, 255, 0, 255),
         )
-        maxArrowAxis = max(maxArrowAxis, self.pathStyle["arrowLength"])
-        maxArrowAxis = max(maxArrowAxis, self.pathStyle["arrowWidth"])
+
+        self.font: Optional[pygame.font.Font] = None
+        self.selectedFont: Optional[pygame.font.Font] = None
+        if pygame.font:
+            self.font = pygame.font.Font(None, self.pathStyle.textsize)
+            self.selectedFont = pygame.font.Font(None, self.pathSelectedStyle.textsize)
+        maxArrowAxis = max(
+            self.pathSelectedStyle.arrowLength, self.pathSelectedStyle.arrowWidth
+        )
+        maxArrowAxis = max(maxArrowAxis, self.pathStyle.arrowLength)
+        maxArrowAxis = max(maxArrowAxis, self.pathStyle.arrowWidth)
         maxArrowAxis = int(1.4 * maxArrowAxis)
-        self.arrowImgSize = (maxArrowAxis, maxArrowAxis)
-        self.arrowRect = pygame.Rect((0, 0), self.arrowImgSize)
-        self.arrowImgSelected = pygame.Surface(self.arrowImgSize).convert_alpha()
-        self.arrowImg = pygame.Surface(self.arrowImgSize).convert_alpha()
+        self.arrowImgSize: Tuple[int, int] = (maxArrowAxis, maxArrowAxis)
+        self.arrowRect: pygame.rect.Rect = pygame.Rect((0, 0), self.arrowImgSize)
+        self.arrowImgSelected: pygame.surface.Surface = pygame.Surface(
+            self.arrowImgSize
+        ).convert_alpha()
+        self.arrowImg: pygame.surface.Surface = pygame.Surface(
+            self.arrowImgSize
+        ).convert_alpha()
         self.arrowImgSelected.fill((0, 0, 0, 0))
         self.arrowImg.fill((0, 0, 0, 0))
         x = self.arrowRect.centerx
         y = self.arrowRect.centery
-        w2 = self.pathStyle["arrowWidth"] / 2
-        l2 = self.pathStyle["arrowLength"] / 2
+        w2 = self.pathStyle.arrowWidth / 2
+        l2 = self.pathStyle.arrowLength / 2
         pygame.draw.polygon(
             self.arrowImg,
-            self.pathStyle["arrowColor"],
+            self.pathStyle.arrowColor,
             [
                 [x - w2, y + l2],
                 [x + w2, y + l2],
                 [x, y - l2],
             ],
         )
-        w2 = self.pathSelectedStyle["arrowWidth"] / 2
-        l2 = self.pathSelectedStyle["arrowLength"] / 2
+        w2 = self.pathSelectedStyle.arrowWidth / 2
+        l2 = self.pathSelectedStyle.arrowLength / 2
         pygame.draw.polygon(
             self.arrowImgSelected,
-            self.pathSelectedStyle["arrowColor"],
+            self.pathSelectedStyle.arrowColor,
             [
                 [x - w2, y + l2],
                 [x + w2, y + l2],
@@ -78,7 +90,13 @@ class FuturePathsView(pygame.sprite.Sprite):
             ],
         )
 
-    def addPath(self, selected, pointList, burnList, timeList=None):
+    def addPath(
+        self,
+        selected: bool,
+        pointList: List[Tuple[int, int]],
+        burnList: List[float],
+        timeList: Optional[List[float]] = None,
+    ) -> None:
         print("addPath starting:")
         print(f"  selected: {selected}")
         print(f"  pointList: {pointList}")
@@ -93,11 +111,11 @@ class FuturePathsView(pygame.sprite.Sprite):
                 font = self.selectedFont
             else:
                 font = self.font
-        color = style["color"]
-        textcolor = style["textcolor"]
-        textbakcolor = style["textbakcolor"]
-        width = style["width"]
-        showTimes = style["showTimes"]
+        color = style.color
+        textcolor = style.textcolor
+        textbakcolor = style.textbakcolor
+        width = style.width
+        showTimes = style.showTimes
         pygame.draw.lines(self.image, color, False, pointList, width)
         for i in range(0, len(burnList) - 1):
             if burnList[i] == 0.0:
@@ -115,13 +133,17 @@ class FuturePathsView(pygame.sprite.Sprite):
             if selected:
                 imgToBlit = self.arrowImgSelected
             imgToBlit = pygame.transform.rotate(imgToBlit, rotation)
-            point[0] -= style["arrowWidth"] / 2
-            point[1] -= style["arrowLength"] / 2
-            self.image.blit(imgToBlit, point)
+            self.image.blit(
+                imgToBlit,
+                (
+                    point[0] - style.arrowWidth // 2,
+                    point[1] - style.arrowLength // 2,
+                ),
+            )
 
         if not showTimes:
             return
-        if timeList != None and font != None:
+        if (timeList is not None) and (font is not None):
             iTime = -1
             pointList = pointList[4:]
             timeList = timeList[4:]
@@ -147,12 +169,17 @@ class FuturePathsView(pygame.sprite.Sprite):
                     time = time / 12.0
                     append = "y"
 
-                timeString = "{0:.0f}".format(time) + append
-                textSurf = font.render(timeString, True, textcolor)  # ,textbakcolor)
-                textSurf = textSurf.convert_alpha()
-                textpos = textSurf.get_rect()
-                textBakSurf = pygame.Surface((textpos[2], textpos[3])).convert_alpha()
-                textBakSurf.fill(textbakcolor)
-                textBakSurf.blit(textSurf, (0, 0))
-                textpos.center = pos
+                if font is not None:
+                    timeString = "{0:.0f}".format(time) + append
+                    textSurf = font.render(
+                        timeString, True, textcolor
+                    )  # ,textbakcolor)
+                    textSurf = textSurf.convert_alpha()
+                    textpos = textSurf.get_rect()
+                    textBakSurf = pygame.Surface(
+                        (textpos[2], textpos[3])
+                    ).convert_alpha()
+                    textBakSurf.fill(textbakcolor)
+                    textBakSurf.blit(textSurf, (0, 0))
+                    textpos.center = pos
                 self.image.blit(textBakSurf, textpos)
