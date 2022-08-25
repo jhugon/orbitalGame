@@ -1,9 +1,27 @@
 import pygame  # type: ignore
 import math
-from typing import Optional, Tuple, List, Any, TYPE_CHECKING
+from dataclasses import dataclass
+from typing import Optional, Tuple, List, Any, TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
     from universe import UniverseView
+
+
+@dataclass
+class PathStyle:
+    """
+    Configuration options for path styles
+    """
+
+    color: Tuple[int, int, int, int] = (255, 255, 255, 100)
+    textcolor: Tuple[int, int, int, int] = (0, 0, 0, 100)
+    textbakcolor: Tuple[int, int, int, int] = (255, 255, 255, 100)
+    width: int = 1
+    textsize: int = 24
+    showTimes: bool = False
+    arrowWidth: int = 8
+    arrowLength: int = 8
+    arrowColor: Tuple[int, int, int, int] = (255, 255, 255, 100)
 
 
 class FuturePathsView(pygame.sprite.Sprite):
@@ -17,41 +35,25 @@ class FuturePathsView(pygame.sprite.Sprite):
         self.rect: pygame.rect.Rect = pygame.Rect((0, 0), self.universe.size)
         self.universe.hudGroup.add(self)
 
-        self.pathSelectedStyle = {
-            "color": (255, 255, 0, 255),
-            "textcolor": (0, 0, 0, 255),
-            "textbakcolor": (0, 255, 0, 255),
-            "width": 2,
-            "textsize": 24,
-            "showTimes": False,
-            "arrowWidth": 8,
-            "arrowLength": 8,
-            "arrowColor": (255, 255, 0, 255),
-        }
-        self.pathStyle = {
-            "color": (255, 255, 255, 100),
-            "textcolor": (0, 0, 0, 100),
-            "textbakcolor": (255, 255, 255, 100),
-            "width": 1,
-            "textsize": 24,
-            "showTimes": False,
-            "arrowWidth": 8,
-            "arrowLength": 8,
-            "arrowColor": (255, 255, 255, 100),
-        }
+        self.pathStyle: PathStyle = PathStyle()
+        self.pathSelectedStyle: PathStyle = PathStyle(
+            color=(255, 255, 0, 255),
+            textcolor=(0, 0, 0, 255),
+            textbakcolor=(0, 255, 0, 255),
+            width=2,
+            arrowColor=(255, 255, 0, 255),
+        )
 
         self.font: Optional[pygame.font.Font] = None
         self.selectedFont: Optional[pygame.font.Font] = None
         if pygame.font:
-            self.font = pygame.font.Font(None, self.pathStyle["textsize"])
-            self.selectedFont = pygame.font.Font(
-                None, self.pathSelectedStyle["textsize"]
-            )
+            self.font = pygame.font.Font(None, self.pathStyle.textsize)
+            self.selectedFont = pygame.font.Font(None, self.pathSelectedStyle.textsize)
         maxArrowAxis = max(
-            self.pathSelectedStyle["arrowLength"], self.pathSelectedStyle["arrowWidth"]
+            self.pathSelectedStyle.arrowLength, self.pathSelectedStyle.arrowWidth
         )
-        maxArrowAxis = max(maxArrowAxis, self.pathStyle["arrowLength"])
-        maxArrowAxis = max(maxArrowAxis, self.pathStyle["arrowWidth"])
+        maxArrowAxis = max(maxArrowAxis, self.pathStyle.arrowLength)
+        maxArrowAxis = max(maxArrowAxis, self.pathStyle.arrowWidth)
         maxArrowAxis = int(1.4 * maxArrowAxis)
         self.arrowImgSize: Tuple[int, int] = (maxArrowAxis, maxArrowAxis)
         self.arrowRect: pygame.rect.Rect = pygame.Rect((0, 0), self.arrowImgSize)
@@ -65,22 +67,22 @@ class FuturePathsView(pygame.sprite.Sprite):
         self.arrowImg.fill((0, 0, 0, 0))
         x = self.arrowRect.centerx
         y = self.arrowRect.centery
-        w2 = self.pathStyle["arrowWidth"] / 2
-        l2 = self.pathStyle["arrowLength"] / 2
+        w2 = self.pathStyle.arrowWidth / 2
+        l2 = self.pathStyle.arrowLength / 2
         pygame.draw.polygon(
             self.arrowImg,
-            self.pathStyle["arrowColor"],
+            self.pathStyle.arrowColor,
             [
                 [x - w2, y + l2],
                 [x + w2, y + l2],
                 [x, y - l2],
             ],
         )
-        w2 = self.pathSelectedStyle["arrowWidth"] / 2
-        l2 = self.pathSelectedStyle["arrowLength"] / 2
+        w2 = self.pathSelectedStyle.arrowWidth / 2
+        l2 = self.pathSelectedStyle.arrowLength / 2
         pygame.draw.polygon(
             self.arrowImgSelected,
-            self.pathSelectedStyle["arrowColor"],
+            self.pathSelectedStyle.arrowColor,
             [
                 [x - w2, y + l2],
                 [x + w2, y + l2],
@@ -109,11 +111,11 @@ class FuturePathsView(pygame.sprite.Sprite):
                 font = self.selectedFont
             else:
                 font = self.font
-        color = style["color"]
-        textcolor = style["textcolor"]
-        textbakcolor = style["textbakcolor"]
-        width = style["width"]
-        showTimes = style["showTimes"]
+        color = style.color
+        textcolor = style.textcolor
+        textbakcolor = style.textbakcolor
+        width = style.width
+        showTimes = style.showTimes
         pygame.draw.lines(self.image, color, False, pointList, width)
         for i in range(0, len(burnList) - 1):
             if burnList[i] == 0.0:
@@ -134,8 +136,8 @@ class FuturePathsView(pygame.sprite.Sprite):
             self.image.blit(
                 imgToBlit,
                 (
-                    point[0] - style["arrowWidth"] // 2,
-                    point[1] - style["arrowLength"] // 2,
+                    point[0] - style.arrowWidth // 2,
+                    point[1] - style.arrowLength // 2,
                 ),
             )
 
