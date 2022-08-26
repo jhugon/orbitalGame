@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [v0.3.0](https://github.com/jhugon/orbitalGame/releases/tag/v0.3.0) - 2022-08-26
+
+- [`fe62b46`](https://github.com/jhugon/orbitalGame/commit/fe62b46bb8ebeef3e69a5f1205a72cdf7690ad3e) feat: add montage images of all of the sprites
+- [`22b1c55`](https://github.com/jhugon/orbitalGame/commit/22b1c55496224c136ac900945072383263f55351) refactor: add type refs to Universe* in spaceobject.py
+- [`83795ad`](https://github.com/jhugon/orbitalGame/commit/83795ada5bc6bc90572a15e4022278a153f55293) Merge pull request #12 from jhugon/futurepaths_typechecking
+- [`602323a`](https://github.com/jhugon/orbitalGame/commit/602323a1c7fe55e8340d7356fda359f191c2f70a) refactor: type checking now works in futurepaths.py
+- [`b36b741`](https://github.com/jhugon/orbitalGame/commit/b36b741ca365255058fe2ff1c324b980c635bb98) refactor: added broken type-checking to futurepaths
+
 ## [v0.2.2](https://github.com/jhugon/orbitalGame/releases/tag/v0.2.2) - 2022-08-24
 
 - [`2bf59eb`](https://github.com/jhugon/orbitalGame/commit/2bf59ebb4d878538c9d594527c6c742b785a2857) Merge pull request #9 from jhugon/spaceobjectviewrefactor
