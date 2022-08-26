@@ -3,7 +3,7 @@ Universe controlls all of the SpaceObjects
 """
 
 import pygame  # type: ignore
-from pygame.locals import *  # type: ignore
+from pygame.locals import QUIT, KEYUP, KEYDOWN, K_ESCAPE, K_UP, K_DOWN, MOUSEBUTTONUP, MOUSEBUTTONDOWN  # type: ignore
 from math import sqrt
 from copy import deepcopy
 from typing import Optional, List, Any, Tuple, TYPE_CHECKING
@@ -128,7 +128,7 @@ class UniverseView(pygame.Surface):
         pygame.Surface.__init__(self, size)
         self.fill((0, 0, 0))
         self.background: Optional[pygame.surface.Surface] = None
-        if backgroundImageLoc == None:
+        if backgroundImageLoc is None:
             self.background = pygame.Surface(size)
             self.background.fill((0, 0, 0))
         else:
@@ -205,7 +205,9 @@ class UniverseView(pygame.Surface):
 
 
 class UniverseCtrl:
-    def __init__(self, size, backgroundImageLoc, debug=False):
+    def __init__(
+        self, size: Tuple[int, int], backgroundImageLoc: str, debug: bool = False
+    ) -> None:
         """
         size is a tuple (x,y): the size of the layer (world) in pixels
         """
@@ -220,18 +222,18 @@ class UniverseCtrl:
 
         self.model = UniverseModel()
         self.view = UniverseView(size, backgroundImageLoc)
-        self.objects = []
+        self.objects: List[SpaceObjectCtrl] = []
 
-        self.selected = []
+        self.selected: List[SpaceObjectCtrl] = []
 
         self.pauseModel = False
         self.selectedModeFlag = False
 
-        self.selectedPathPointsView = None
-        self.selectedPathTimes = None
-        self.selectedBurnStartIndex = None
+        self.selectedPathPointsView: Optional[List[Tuple[int, int]]] = None
+        self.selectedPathTimes: Optional[List[float]] = None
+        self.selectedBurnStartIndex: Optional[int] = None
 
-    def addObject(self, obj):
+    def addObject(self, obj: "SpaceObjectCtrl") -> None:
         self.objects += [obj]
         self.model.addObject(obj.model)
         self.view.addObject(obj.view)
@@ -247,11 +249,11 @@ class UniverseCtrl:
             y - self.viewSize[1] / 2
         ) * self.meterPerPixel
 
-    def updateViewToModel(self):
+    def updateViewToModel(self) -> None:
         for obj in self.objects:
             obj.updateViewToModel()
 
-    def run(self):
+    def run(self) -> None:
         clock = pygame.time.Clock()
         running = True
         counter = 0.0
@@ -289,7 +291,7 @@ class UniverseCtrl:
                         self.selectedMode(clickedObjects[0])
                     elif self.selectedModeFlag:
                         startIndex = self.isCloseToFuturePath(mousePosition)
-                        if startIndex != None:
+                        if startIndex is not None:
                             self.selectedBurnStartIndex = startIndex
                         else:
                             self.deSelectedMode()
@@ -297,19 +299,29 @@ class UniverseCtrl:
                         self.deSelectedMode()
                 elif event.type == MOUSEBUTTONUP:
                     mousePosition = event.dict["pos"]
-                    if self.selectedModeFlag and self.selectedBurnStartIndex != None:
+                    if (
+                        self.selectedModeFlag
+                        and self.selectedBurnStartIndex is not None
+                        and self.selectedPathTimes is not None
+                    ):
                         endIndex = self.isCloseToFuturePath(mousePosition)
-                        if endIndex != None and endIndex != self.selectedBurnStartIndex:
+                        if (
+                            endIndex is not None
+                            and endIndex != self.selectedBurnStartIndex
+                        ):
                             burnStartT = self.selectedPathTimes[
                                 self.selectedBurnStartIndex
                             ]
                             burnEndT = self.selectedPathTimes[endIndex]
-                            if burnEndT > burnStartT:
-                                self.selected[0].scheduleBurn(burnStartT, burnEndT, 1.0)
-                            if burnEndT < burnStartT:
-                                self.selected[0].scheduleBurn(
-                                    burnEndT, burnStartT, -1.0
-                                )
+                            if burnEndT is not None:
+                                if burnEndT > burnStartT:
+                                    self.selected[0].scheduleBurn(
+                                        burnStartT, burnEndT, 1.0
+                                    )
+                                if burnEndT < burnStartT:
+                                    self.selected[0].scheduleBurn(
+                                        burnEndT, burnStartT, -1.0
+                                    )
                         else:
                             self.selectedBurnStartIndex = None
 
@@ -330,21 +342,21 @@ class UniverseCtrl:
         ## End of event loop
         pygame.quit()
 
-    def findObjectsAtPoint(self, point):
-        result = []
+    def findObjectsAtPoint(self, point: Tuple[int, int]) -> List["SpaceObjectCtrl"]:
+        result: List["SpaceObjectCtrl"] = []
         for obj in self.objects:
             if obj.view.rect.collidepoint(*point):
                 result += [obj]
         return result
 
-    def selectedMode(self, selectedObject):
+    def selectedMode(self, selectedObject: "SpaceObjectCtrl") -> None:
         self.deSelectedMode()
         selectedObject.select()
         self.pauseModel = True
         self.selectedModeFlag = True
         self.showPaths()
 
-    def deSelectedMode(self):
+    def deSelectedMode(self) -> None:
         self.pauseModel = False
         self.selectedModeFlag = False
         for obj in self.objects:
@@ -359,8 +371,8 @@ class UniverseCtrl:
     def showPaths(self) -> None:
         self.view.hudGroup.empty()
         timePoints = [i * 1e3 for i in range(30)]
-        selectedModel = self.selected[0].model
-        if selectedModel == None or selectedModel.mass > 0.0:
+        selectedModel: Optional[SpaceObjectModel] = self.selected[0].model
+        if selectedModel is None or selectedModel.mass > 0.0:
             selectedModel = None
         futurePaths, futureBurns = self.model.getFuture(
             timePoints, selectedObj=selectedModel
@@ -373,16 +385,16 @@ class UniverseCtrl:
                 pathView += [pView]
             futurePathsView += [pathView]
         selected = True
-        if selectedModel == None or selectedModel.mass > 0.0:
+        if selectedModel is None or selectedModel.mass > 0.0:
             selected = False
         self.view.showPaths(futurePathsView, futureBurns, timePoints, selected=selected)
 
-        if selectedModel != None and selectedModel.mass == 0.0:
+        if selectedModel is not None and selectedModel.mass == 0.0:
             self.selectedPathPointsView = futurePathsView[0]
             self.selectedPathTimes = timePoints
 
-    def isCloseToFuturePath(self, pos):
-        if self.selectedPathPointsView == None:
+    def isCloseToFuturePath(self, pos: Tuple[int, int]) -> Optional[int]:
+        if self.selectedPathPointsView is None:
             return None
         drMax2 = self.dRClickPath**2
         x, y = pos
