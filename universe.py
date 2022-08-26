@@ -6,11 +6,14 @@ import pygame  # type: ignore
 from pygame.locals import *  # type: ignore
 from math import sqrt
 from copy import deepcopy
-from typing import Optional, List, Any, Tuple
+from typing import Optional, List, Any, Tuple, TYPE_CHECKING
 
 from utils import Vec2
 from futurepaths import FuturePathsView
 from spaceobject import SpaceObjectModel, SpaceObjectCtrl, SpaceObjectView
+
+if TYPE_CHECKING:
+    from spaceobject import SpaceObjectModel, SpaceObjectView, SpaceObjectCtrl
 
 
 class UniverseModel:
@@ -117,14 +120,14 @@ class UniverseModel:
 
 
 class UniverseView(pygame.Surface):
-    def __init__(self, size, backgroundImageLoc):
+    def __init__(self, size: Tuple[int, int], backgroundImageLoc: str) -> None:
         """
         size is a tuple (x,y): the size of the layer (world) in pixels
         """
         self.screen = pygame.display.set_mode(size)
         pygame.Surface.__init__(self, size)
         self.fill((0, 0, 0))
-        self.background = None
+        self.background: Optional[pygame.surface.Surface] = None
         if backgroundImageLoc == None:
             self.background = pygame.Surface(size)
             self.background.fill((0, 0, 0))
@@ -143,19 +146,23 @@ class UniverseView(pygame.Surface):
         self.screen.blit(self, (0, 0))
         pygame.display.update()
 
-        self.objects = pygame.sprite.RenderUpdates()
+        self.objects: pygame.sprite.RenderUpdates = pygame.sprite.RenderUpdates()
         self.selected = pygame.sprite.Group()
         self.hudGroup = pygame.sprite.RenderUpdates()
-        self.toUpdateRectsList = []
+        self.toUpdateRectsList: List[pygame.rect.Rect] = []
 
         self.updateAllFlag = False
 
-    def addObject(self, obj):
+    def addObject(self, obj: "SpaceObjectView") -> None:
         obj.setUniverse(self)
         self.objects.add(obj)
 
-    def update(self):
-        # Draw Everything
+    def update(self) -> None:
+        """
+        Draw Everything
+        """
+        if self.background is None:
+            raise ValueError("background has not been set")
         if self.updateAllFlag:
             self.blit(self.background, (0, 0))
         self.screen.blit(self, (0, 0))
@@ -167,14 +174,24 @@ class UniverseView(pygame.Surface):
             pygame.display.update()
             self.updateAllFlag = False
         else:
-            pygame.display.update(self.toUpdateRectsList)
+            pygame.display.update(self.toUpdateRectsList)  # type: ignore
         self.toUpdateRectsList = []
 
-    def deselectAll(self):
+    def deselectAll(self) -> None:
         for obj in self.objects:
-            obj.deSelect()
+            if not hasattr(obj, "deSelect"):
+                raise TypeError(
+                    "object isn't an instance of SpaceObjectView or otherwise doesn't have deSelect method"
+                )
+            obj.deSelect()  # type: ignore
 
-    def showPaths(self, futurePaths, futureBurns, timePoints=None, selected=False):
+    def showPaths(
+        self,
+        futurePaths: List[List[Tuple[int, int]]],
+        futureBurns: List[List[float]],
+        timePoints: Optional[List[float]] = None,
+        selected: bool = False,
+    ) -> None:
         pathsView = FuturePathsView(self)
         selectedBools = [False for i in range(len(futurePaths))]
         selectedBools[0] = selected
