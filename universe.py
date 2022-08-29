@@ -79,22 +79,7 @@ class UniverseModel:
 
         dtStepSize is in model seconds, just like dtList
         """
-        futureUniverse = deepcopy(self)
-        mlos = futureUniverse.masslessObjects
-        if selectedObj is not None:
-            foundSelected = False
-            mlosNew: List[SpaceObjectModel] = []
-            for obj in mlos:
-                if obj.kinematics == selectedObj.kinematics:
-                    selectedObj = obj
-                    foundSelected = True
-                    continue
-                mlosNew += [obj]
-            mlos = mlosNew
-            if foundSelected:
-                mlos.append(selectedObj)
-                mlos.reverse()
-            assert foundSelected
+        futureUniverse, mlos = self.copyUniverse(selectedObj)
 
         futurePositionList: List[List[Vec2]] = [[] for i in mlos]
         futureBurnList: List[List[float]] = [[] for i in mlos]
@@ -121,11 +106,32 @@ class UniverseModel:
             dtTotal += dtStep
             if iDt >= len(dtList):
                 break
-        if selectedObj is None:
-            print(f"Nothing Current Selected")
-        else:
-            print(f"Current Selected {selectedObj.kinematics}")
         return futurePositionList, futureBurnList
+
+    def copyUniverse(
+        self, selectedObj: Optional["SpaceObjectModel"] = None
+    ) -> Tuple["UniverseModel", List[SpaceObjectModel]]:
+        """
+        Make a copy of this universe and also return a list of its massless objects.
+        If selectedObj is not None, then make sure it is first in the list
+        """
+        futureUniverse = deepcopy(self)
+        mlos = futureUniverse.masslessObjects
+        if selectedObj is not None:
+            foundSelected = False
+            mlosNew: List[SpaceObjectModel] = []
+            for obj in mlos:
+                if obj.kinematics == selectedObj.kinematics:
+                    selectedObj = obj
+                    foundSelected = True
+                    continue
+                mlosNew += [obj]
+            mlos = mlosNew
+            if foundSelected:
+                mlos.append(selectedObj)
+                mlos.reverse()
+            assert foundSelected
+        return futureUniverse, mlos
 
 
 ######################################################3
