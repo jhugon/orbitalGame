@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [v0.3.1](https://github.com/jhugon/orbitalGame/releases/tag/v0.3.1) - 2022-08-29
+
+- [`91583f7`](https://github.com/jhugon/orbitalGame/commit/91583f7ddd368cb9a1c93cc9c3603fddd46fb475) Merge pull request #10 from jhugon/universe_refactoring
+- [`e9671e9`](https://github.com/jhugon/orbitalGame/commit/e9671e9f94584da1db0ae2f143398db8042a78d1) refactor: moved some UniverseView into MainWindow in ui.py
+- [`bc5fc63`](https://github.com/jhugon/orbitalGame/commit/bc5fc63d5e1fc02ee7c50777e88d9338182b446a) refactor(universe): input event handling broken out into methods
+- [`04839f6`](https://github.com/jhugon/orbitalGame/commit/04839f6ada2ecb06a1d071f6ff25e695d5baac64) refactor: broke out part of UniverseModel.getFuture into copyUniverse
+- [`656a5cd`](https://github.com/jhugon/orbitalGame/commit/656a5cdcc3764fdf19e846151eefbc977ef3e0f8) refactor(universe): add docstrings to methods
+- [`880e0c7`](https://github.com/jhugon/orbitalGame/commit/880e0c7f33758e8ea3d3e829d2e11c553efdfcce) refactor: add typing to UniverseCtrl
+- [`1d61a57`](https://github.com/jhugon/orbitalGame/commit/1d61a576683544b8634307f1327bab7dbee13b7c) refactor: added type checking to UniverseView
+- [`4908542`](https://github.com/jhugon/orbitalGame/commit/490854247c6c9ebf3e610e1d6a8d254b26ea7578) refactor: get rid of path printing in universe
+- [`08aab97`](https://github.com/jhugon/orbitalGame/commit/08aab97f99f75e71ae65de9fabc0bcfb294bfca7) fix: universe with Vec2 works now; kinematics returns copies of Vec2s
+- [`ef216f7`](https://github.com/jhugon/orbitalGame/commit/ef216f75f5cdec4984150bf98deb76d400524784) refactor: try to use Vec2 in getFuture, but not working
+- [`5d531f6`](https://github.com/jhugon/orbitalGame/commit/5d531f628f0f9d09795ede4fc043a8ee441dac85) refactor: Merge branch main into universe_refactoring
+- [`fe845f8`](https://github.com/jhugon/orbitalGame/commit/fe845f8f1dba4ed56ad0cdba29c59a48be779adc) revert(universe): reverted code to use tuples instead of Vec2
+- [`b95a2f6`](https://github.com/jhugon/orbitalGame/commit/b95a2f600d706128fd0ff419bb66a9a98fc03df1) refactor: adding type annotations to UniverseModel
+
 ## [v0.3.0](https://github.com/jhugon/orbitalGame/releases/tag/v0.3.0) - 2022-08-26
 
 - [`fe62b46`](https://github.com/jhugon/orbitalGame/commit/fe62b46bb8ebeef3e69a5f1205a72cdf7690ad3e) feat: add montage images of all of the sprites
