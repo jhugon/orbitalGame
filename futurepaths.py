@@ -99,11 +99,6 @@ class FuturePathsView(pygame.sprite.Sprite):
         burnList: List[float],
         timeList: Optional[List[float]] = None,
     ) -> None:
-        print("addPath starting:")
-        print(f"  selected: {selected}")
-        print(f"  pointList: {pointList}")
-        print(f"  burnList: {burnList}")
-        print(f"  timeList: {timeList}")
         assert len(pointList) == len(pointList)
         if timeList is not None:
             assert len(timeList) == len(burnList)
@@ -121,7 +116,11 @@ class FuturePathsView(pygame.sprite.Sprite):
         textbakcolor = style.textbakcolor
         width = style.width
         showTimes = style.showTimes
+
+        ## draw the orbits right here
         pygame.draw.lines(self.image, color, False, pointList, width)
+
+        ## draw the little arrows for the burn
         for i in range(0, len(burnList) - 1):
             if burnList[i] == 0.0:
                 continue
@@ -146,6 +145,7 @@ class FuturePathsView(pygame.sprite.Sprite):
                 ),
             )
 
+        ## Show times around the orbit--does this work? Is it useful?
         if not showTimes:
             return
         if (timeList is not None) and (font is not None):
