@@ -1,5 +1,5 @@
 """
-Universe controlls all of the SpaceObjects
+Universe controls all of the SpaceObjects
 """
 
 import pygame  # type: ignore
@@ -17,6 +17,10 @@ if TYPE_CHECKING:
 
 
 class UniverseModel:
+    """
+    Models the dynamics of the universe of SpaceObjectModels
+    """
+
     def __init__(self, G: float = 6.67e-11, rPower: float = -2.0) -> None:
         """
         G is the gravitational constant
@@ -35,6 +39,9 @@ class UniverseModel:
             self.masslessObjects += [obj]
 
     def getA(self, position: Vec2) -> Vec2:
+        """
+        Get the gravitational acceleration at a point in space
+        """
         acceleration = Vec2(0.0, 0.0)
         for mo in self.massiveObjects:
             rVec = mo.kinematics.getPosition() - position
@@ -47,6 +54,9 @@ class UniverseModel:
         return acceleration
 
     def update(self, dt: float) -> None:
+        """
+        Update all of the objects' acceleration, velocity, position, and thrusts
+        """
         for obj in self.massiveObjects + self.masslessObjects:
             obj.update1(dt)
         for obj in self.massiveObjects + self.masslessObjects:
@@ -65,6 +75,8 @@ class UniverseModel:
         dtStepSize: float = 1e2,
     ) -> Tuple[List[List[Vec2]], List[List[float]]]:
         """
+        Get the future positions and thrusts of all massless objects in the universe
+
         dtStepSize is in model seconds, just like dtList
         """
         futureUniverse = deepcopy(self)
@@ -178,6 +190,9 @@ class UniverseView(pygame.Surface):
         self.toUpdateRectsList = []
 
     def deselectAll(self) -> None:
+        """
+        Make sure no objects are selected
+        """
         for obj in self.objects:
             if not hasattr(obj, "deSelect"):
                 raise TypeError(
@@ -192,6 +207,9 @@ class UniverseView(pygame.Surface):
         timePoints: Optional[List[float]] = None,
         selected: bool = False,
     ) -> None:
+        """
+        Draw the future paths, highlighting the first entry in the list, if selected is True
+        """
         pathsView = FuturePathsView(self)
         selectedBools = [False for i in range(len(futurePaths))]
         selectedBools[0] = selected
@@ -209,6 +227,8 @@ class UniverseCtrl:
         self, size: Tuple[int, int], backgroundImageLoc: str, debug: bool = False
     ) -> None:
         """
+        Controls the program
+
         size is a tuple (x,y): the size of the layer (world) in pixels
         """
         self.viewSize = size
@@ -239,21 +259,33 @@ class UniverseCtrl:
         self.view.addObject(obj.view)
 
     def convertCoordsModel2View(self, x: float, y: float) -> Tuple[int, int]:
+        """
+        Convert from model/dynamics coordinates to view/screen/window coordinates
+        """
         return (
             int(x // self.meterPerPixel + self.viewSize[0] // 2),
             int(-y // self.meterPerPixel + self.viewSize[1] // 2),
         )
 
     def convertCoordsView2Model(self, x: int, y: int) -> Tuple[float, float]:
+        """
+        Convert from view/screen/window coordinates to model/dynamics coordinates
+        """
         return (x - self.viewSize[0] / 2) * self.meterPerPixel, (
             y - self.viewSize[1] / 2
         ) * self.meterPerPixel
 
     def updateViewToModel(self) -> None:
+        """
+        Make sure the view/screen/window matches the model/dynamics
+        """
         for obj in self.objects:
             obj.updateViewToModel()
 
     def run(self) -> None:
+        """
+        Start the game
+        """
         clock = pygame.time.Clock()
         running = True
         counter = 0.0
@@ -288,15 +320,15 @@ class UniverseCtrl:
                     clickedObjects = self.findObjectsAtPoint(mousePosition)
                     nClickedObjects = len(clickedObjects)
                     if nClickedObjects == 1:
-                        self.selectedMode(clickedObjects[0])
+                        self.selectObject(clickedObjects[0])
                     elif self.selectedModeFlag:
                         startIndex = self.isCloseToFuturePath(mousePosition)
                         if startIndex is not None:
                             self.selectedBurnStartIndex = startIndex
                         else:
-                            self.deSelectedMode()
+                            self.deselectAll()
                     elif nClickedObjects == 0.0:
-                        self.deSelectedMode()
+                        self.deselectAll()
                 elif event.type == MOUSEBUTTONUP:
                     mousePosition = event.dict["pos"]
                     if (
@@ -343,20 +375,29 @@ class UniverseCtrl:
         pygame.quit()
 
     def findObjectsAtPoint(self, point: Tuple[int, int]) -> List["SpaceObjectCtrl"]:
+        """
+        Find an object (if any) at the given (view/screen) point
+        """
         result: List["SpaceObjectCtrl"] = []
         for obj in self.objects:
             if obj.view.rect.collidepoint(*point):
                 result += [obj]
         return result
 
-    def selectedMode(self, selectedObject: "SpaceObjectCtrl") -> None:
-        self.deSelectedMode()
+    def selectObject(self, selectedObject: "SpaceObjectCtrl") -> None:
+        """
+        Select a space object, and bring the UI into selected mode
+        """
+        self.deselectAll()
         selectedObject.select()
         self.pauseModel = True
         self.selectedModeFlag = True
         self.showPaths()
 
-    def deSelectedMode(self) -> None:
+    def deselectAll(self) -> None:
+        """
+        Make sure no space object is selected and the UI isn't in selected mode
+        """
         self.pauseModel = False
         self.selectedModeFlag = False
         for obj in self.objects:
@@ -369,6 +410,9 @@ class UniverseCtrl:
         self.selectedBurnStartIndex = None
 
     def showPaths(self) -> None:
+        """
+        Show space object paths in view
+        """
         self.view.hudGroup.empty()
         timePoints = [i * 1e3 for i in range(30)]
         selectedModel: Optional[SpaceObjectModel] = self.selected[0].model
@@ -394,6 +438,9 @@ class UniverseCtrl:
             self.selectedPathTimes = timePoints
 
     def isCloseToFuturePath(self, pos: Tuple[int, int]) -> Optional[int]:
+        """
+        Check if position is close to a path
+        """
         if self.selectedPathPointsView is None:
             return None
         drMax2 = self.dRClickPath**2
