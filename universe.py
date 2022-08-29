@@ -11,6 +11,7 @@ from typing import Optional, List, Any, Tuple, TYPE_CHECKING
 from utils import Vec2
 from futurepaths import FuturePathsView
 from spaceobject import SpaceObjectModel, SpaceObjectCtrl, SpaceObjectView
+from ui import MainWindow
 
 if TYPE_CHECKING:
     from spaceobject import SpaceObjectModel, SpaceObjectView, SpaceObjectCtrl
@@ -137,39 +138,13 @@ class UniverseModel:
 ######################################################3
 
 
-class UniverseView(pygame.Surface):
-    def __init__(self, size: Tuple[int, int], backgroundImageLoc: str) -> None:
-        """
-        size is a tuple (x,y): the size of the layer (world) in pixels
-        """
-        self.screen = pygame.display.set_mode(size)
-        pygame.Surface.__init__(self, size)
-        self.fill((0, 0, 0))
-        self.background: Optional[pygame.surface.Surface] = None
-        if backgroundImageLoc is None:
-            self.background = pygame.Surface(size)
-            self.background.fill((0, 0, 0))
-        else:
-            try:
-                self.background = pygame.image.load(backgroundImageLoc)
-            except pygame.error as e:
-                print(("Cannot load background image:", backgroundImageLoc))
-                raise SystemExit(e)
-            self.background = self.background.convert()
-            self.background = pygame.transform.smoothscale(self.background, size)
-            self.blit(self.background, (0, 0))
-        self.size = size
-
-        pygame.display.set_caption("Orbital Game")
-        self.screen.blit(self, (0, 0))
-        pygame.display.update()
-
+class UniverseView:
+    def __init__(self, window: "MainWindow") -> None:
+        self.window = window
         self.objects: pygame.sprite.RenderUpdates = pygame.sprite.RenderUpdates()
         self.selected = pygame.sprite.Group()
         self.hudGroup = pygame.sprite.RenderUpdates()
         self.toUpdateRectsList: List[pygame.rect.Rect] = []
-
-        self.updateAllFlag = False
 
     def addObject(self, obj: "SpaceObjectView") -> None:
         obj.setUniverse(self)
@@ -177,22 +152,13 @@ class UniverseView(pygame.Surface):
 
     def update(self) -> None:
         """
-        Draw Everything
+        Update everything
         """
-        if self.background is None:
-            raise ValueError("background has not been set")
-        if self.updateAllFlag:
-            self.blit(self.background, (0, 0))
-        self.screen.blit(self, (0, 0))
         self.objects.update()
-        self.toUpdateRectsList += self.objects.draw(self.screen)
-        self.toUpdateRectsList += self.hudGroup.draw(self.screen)
+        self.toUpdateRectsList += self.objects.draw(self.window.screen)
+        self.toUpdateRectsList += self.hudGroup.draw(self.window.screen)
 
-        if self.updateAllFlag:
-            pygame.display.update()
-            self.updateAllFlag = False
-        else:
-            pygame.display.update(self.toUpdateRectsList)  # type: ignore
+        pygame.display.update(self.toUpdateRectsList)  # type: ignore
         self.toUpdateRectsList = []
 
     def deselectAll(self) -> None:
@@ -246,8 +212,9 @@ class UniverseCtrl:
         self.updateModelEvery = 1e2  # seconds of model time
         self.dRClickPath = 25.0
 
+        self.mainwindow = MainWindow(size, backgroundImageLoc)
         self.model = UniverseModel()
-        self.view = UniverseView(size, backgroundImageLoc)
+        self.view = UniverseView(self.mainwindow)
         self.objects: List[SpaceObjectCtrl] = []
 
         self.selected: List[SpaceObjectCtrl] = []
@@ -321,6 +288,7 @@ class UniverseCtrl:
             self.updateViewToModel()
 
             # Update View
+            self.mainwindow.update()
             self.view.update()
 
         ## End of event loop
