@@ -307,61 +307,7 @@ class UniverseCtrl:
 
             # Handle Input Events
             for event in pygame.event.get():
-                if event.type == QUIT:
-                    running = False
-                elif event.type == KEYDOWN and event.key == K_ESCAPE:
-                    running = False
-
-                elif event.type == KEYDOWN and event.key == K_UP:
-                    for obj in self.selected:
-                        obj.model.thrust = 1.0
-                elif event.type == KEYDOWN and event.key == K_DOWN:
-                    for obj in self.selected:
-                        obj.model.thrust = -1.0
-                elif event.type == KEYUP and (event.key == K_UP or event.key == K_DOWN):
-                    for obj in self.objects:
-                        obj.model.thrust = 0.0
-                elif event.type == MOUSEBUTTONDOWN and event.dict["button"] == 1:
-                    mousePosition = event.dict["pos"]
-                    clickedObjects = self.findObjectsAtPoint(mousePosition)
-                    nClickedObjects = len(clickedObjects)
-                    if nClickedObjects == 1:
-                        self.selectObject(clickedObjects[0])
-                    elif self.selectedModeFlag:
-                        startIndex = self.isCloseToFuturePath(mousePosition)
-                        if startIndex is not None:
-                            self.selectedBurnStartIndex = startIndex
-                        else:
-                            self.deselectAll()
-                    elif nClickedObjects == 0.0:
-                        self.deselectAll()
-                elif event.type == MOUSEBUTTONUP:
-                    mousePosition = event.dict["pos"]
-                    if (
-                        self.selectedModeFlag
-                        and self.selectedBurnStartIndex is not None
-                        and self.selectedPathTimes is not None
-                    ):
-                        endIndex = self.isCloseToFuturePath(mousePosition)
-                        if (
-                            endIndex is not None
-                            and endIndex != self.selectedBurnStartIndex
-                        ):
-                            burnStartT = self.selectedPathTimes[
-                                self.selectedBurnStartIndex
-                            ]
-                            burnEndT = self.selectedPathTimes[endIndex]
-                            if burnEndT is not None:
-                                if burnEndT > burnStartT:
-                                    self.selected[0].scheduleBurn(
-                                        burnStartT, burnEndT, 1.0
-                                    )
-                                if burnEndT < burnStartT:
-                                    self.selected[0].scheduleBurn(
-                                        burnEndT, burnStartT, -1.0
-                                    )
-                        else:
-                            self.selectedBurnStartIndex = None
+                running = running and self.handleUIEvents(event)
 
             # Update Model
             if not self.pauseModel:
@@ -379,6 +325,64 @@ class UniverseCtrl:
 
         ## End of event loop
         pygame.quit()
+
+    def handleUIEvents(self, event: pygame.event.Event) -> bool:
+        running = True
+        if event.type == QUIT:
+            running = False
+        elif event.type == KEYDOWN and event.key == K_ESCAPE:
+            running = False
+
+        elif event.type == KEYDOWN and event.key == K_UP:
+            for obj in self.selected:
+                obj.model.thrust = 1.0
+        elif event.type == KEYDOWN and event.key == K_DOWN:
+            for obj in self.selected:
+                obj.model.thrust = -1.0
+        elif event.type == KEYUP and (event.key == K_UP or event.key == K_DOWN):
+            for obj in self.objects:
+                obj.model.thrust = 0.0
+        elif event.type == MOUSEBUTTONDOWN and event.dict["button"] == 1:
+            self.handleMouseButtonDownEvent(event)
+        elif event.type == MOUSEBUTTONUP:
+            self.handleMouseButtonUpEvent(event)
+        return running
+
+    def handleMouseButtonDownEvent(self, event: pygame.event.Event) -> None:
+        assert event.type == MOUSEBUTTONDOWN and event.dict["button"] == 1
+        mousePosition = event.dict["pos"]
+        clickedObjects = self.findObjectsAtPoint(mousePosition)
+        nClickedObjects = len(clickedObjects)
+        if nClickedObjects == 1:
+            self.selectObject(clickedObjects[0])
+        elif self.selectedModeFlag:
+            startIndex = self.isCloseToFuturePath(mousePosition)
+            if startIndex is not None:
+                self.selectedBurnStartIndex = startIndex
+            else:
+                self.deselectAll()
+        elif nClickedObjects == 0:
+            self.deselectAll()
+
+    def handleMouseButtonUpEvent(self, event: pygame.event.Event) -> None:
+        assert event.type == MOUSEBUTTONUP
+        mousePosition = event.dict["pos"]
+        if (
+            self.selectedModeFlag
+            and self.selectedBurnStartIndex is not None
+            and self.selectedPathTimes is not None
+        ):
+            endIndex = self.isCloseToFuturePath(mousePosition)
+            if endIndex is not None and endIndex != self.selectedBurnStartIndex:
+                burnStartT = self.selectedPathTimes[self.selectedBurnStartIndex]
+                burnEndT = self.selectedPathTimes[endIndex]
+                if burnEndT is not None:
+                    if burnEndT > burnStartT:
+                        self.selected[0].scheduleBurn(burnStartT, burnEndT, 1.0)
+                    if burnEndT < burnStartT:
+                        self.selected[0].scheduleBurn(burnEndT, burnStartT, -1.0)
+            else:
+                self.selectedBurnStartIndex = None
 
     def findObjectsAtPoint(self, point: Tuple[int, int]) -> List["SpaceObjectCtrl"]:
         """
