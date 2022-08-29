@@ -49,28 +49,29 @@ class FuturePathsView(pygame.sprite.Sprite):
         if pygame.font:
             self.font = pygame.font.Font(None, self.pathStyle.textsize)
             self.selectedFont = pygame.font.Font(None, self.pathSelectedStyle.textsize)
+        self.arrowImg, self.arrowImgSelected = self._prepareArrowImg()
+
+    def _prepareArrowImg(self) -> Tuple[pygame.surface.Surface, pygame.surface.Surface]:
         maxArrowAxis = max(
             self.pathSelectedStyle.arrowLength, self.pathSelectedStyle.arrowWidth
         )
         maxArrowAxis = max(maxArrowAxis, self.pathStyle.arrowLength)
         maxArrowAxis = max(maxArrowAxis, self.pathStyle.arrowWidth)
         maxArrowAxis = int(1.4 * maxArrowAxis)
-        self.arrowImgSize: Tuple[int, int] = (maxArrowAxis, maxArrowAxis)
-        self.arrowRect: pygame.rect.Rect = pygame.Rect((0, 0), self.arrowImgSize)
-        self.arrowImgSelected: pygame.surface.Surface = pygame.Surface(
-            self.arrowImgSize
+        arrowImgSize: Tuple[int, int] = (maxArrowAxis, maxArrowAxis)
+        arrowRect: pygame.rect.Rect = pygame.Rect((0, 0), arrowImgSize)
+        arrowImgSelected: pygame.surface.Surface = pygame.Surface(
+            arrowImgSize
         ).convert_alpha()
-        self.arrowImg: pygame.surface.Surface = pygame.Surface(
-            self.arrowImgSize
-        ).convert_alpha()
-        self.arrowImgSelected.fill((0, 0, 0, 0))
-        self.arrowImg.fill((0, 0, 0, 0))
-        x = self.arrowRect.centerx
-        y = self.arrowRect.centery
+        arrowImg: pygame.surface.Surface = pygame.Surface(arrowImgSize).convert_alpha()
+        arrowImgSelected.fill((0, 0, 0, 0))
+        arrowImg.fill((0, 0, 0, 0))
+        x = arrowRect.centerx
+        y = arrowRect.centery
         w2 = self.pathStyle.arrowWidth / 2
         l2 = self.pathStyle.arrowLength / 2
         pygame.draw.polygon(
-            self.arrowImg,
+            arrowImg,
             self.pathStyle.arrowColor,
             [
                 [x - w2, y + l2],
@@ -81,7 +82,7 @@ class FuturePathsView(pygame.sprite.Sprite):
         w2 = self.pathSelectedStyle.arrowWidth / 2
         l2 = self.pathSelectedStyle.arrowLength / 2
         pygame.draw.polygon(
-            self.arrowImgSelected,
+            arrowImgSelected,
             self.pathSelectedStyle.arrowColor,
             [
                 [x - w2, y + l2],
@@ -89,6 +90,7 @@ class FuturePathsView(pygame.sprite.Sprite):
                 [x, y - l2],
             ],
         )
+        return arrowImg, arrowImgSelected
 
     def addPath(
         self,
