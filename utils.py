@@ -166,3 +166,6 @@ class Vec2:
 
     def __repr__(self) -> str:
         return str(self)
+
+    def copy(self) -> "Vec2":
+        return Vec2(self.x, self.y)

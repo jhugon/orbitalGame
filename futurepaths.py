@@ -29,10 +29,10 @@ class FuturePathsView(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.universe: "UniverseView" = universeView
         self.image: pygame.surface.Surface = pygame.Surface(
-            self.universe.size
+            self.universe.window.size
         ).convert_alpha()
         self.image.fill((0, 0, 0, 0))
-        self.rect: pygame.rect.Rect = pygame.Rect((0, 0), self.universe.size)
+        self.rect: pygame.rect.Rect = pygame.Rect((0, 0), self.universe.window.size)
         self.universe.hudGroup.add(self)
 
         self.pathStyle: PathStyle = PathStyle()
@@ -102,6 +102,9 @@ class FuturePathsView(pygame.sprite.Sprite):
         print(f"  pointList: {pointList}")
         print(f"  burnList: {burnList}")
         print(f"  timeList: {timeList}")
+        assert len(pointList) == len(pointList)
+        if timeList is not None:
+            assert len(timeList) == len(burnList)
         style = self.pathStyle
         font = None
         if selected:
