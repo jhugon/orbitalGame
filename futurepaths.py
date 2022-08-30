@@ -25,6 +25,10 @@ class PathStyle:
 
 
 class FuturePathsView(pygame.sprite.Sprite):
+    """
+    Draw future paths and burns
+    """
+
     def __init__(self, universeView: "UniverseView") -> None:
         pygame.sprite.Sprite.__init__(self)
         self.universe: "UniverseView" = universeView
@@ -49,46 +53,7 @@ class FuturePathsView(pygame.sprite.Sprite):
         if pygame.font:
             self.font = pygame.font.Font(None, self.pathStyle.textsize)
             self.selectedFont = pygame.font.Font(None, self.pathSelectedStyle.textsize)
-        maxArrowAxis = max(
-            self.pathSelectedStyle.arrowLength, self.pathSelectedStyle.arrowWidth
-        )
-        maxArrowAxis = max(maxArrowAxis, self.pathStyle.arrowLength)
-        maxArrowAxis = max(maxArrowAxis, self.pathStyle.arrowWidth)
-        maxArrowAxis = int(1.4 * maxArrowAxis)
-        self.arrowImgSize: Tuple[int, int] = (maxArrowAxis, maxArrowAxis)
-        self.arrowRect: pygame.rect.Rect = pygame.Rect((0, 0), self.arrowImgSize)
-        self.arrowImgSelected: pygame.surface.Surface = pygame.Surface(
-            self.arrowImgSize
-        ).convert_alpha()
-        self.arrowImg: pygame.surface.Surface = pygame.Surface(
-            self.arrowImgSize
-        ).convert_alpha()
-        self.arrowImgSelected.fill((0, 0, 0, 0))
-        self.arrowImg.fill((0, 0, 0, 0))
-        x = self.arrowRect.centerx
-        y = self.arrowRect.centery
-        w2 = self.pathStyle.arrowWidth / 2
-        l2 = self.pathStyle.arrowLength / 2
-        pygame.draw.polygon(
-            self.arrowImg,
-            self.pathStyle.arrowColor,
-            [
-                [x - w2, y + l2],
-                [x + w2, y + l2],
-                [x, y - l2],
-            ],
-        )
-        w2 = self.pathSelectedStyle.arrowWidth / 2
-        l2 = self.pathSelectedStyle.arrowLength / 2
-        pygame.draw.polygon(
-            self.arrowImgSelected,
-            self.pathSelectedStyle.arrowColor,
-            [
-                [x - w2, y + l2],
-                [x + w2, y + l2],
-                [x, y - l2],
-            ],
-        )
+        self.arrowImg, self.arrowImgSelected = self._prepareArrowImg()
 
     def addPath(
         self,
@@ -97,29 +62,31 @@ class FuturePathsView(pygame.sprite.Sprite):
         burnList: List[float],
         timeList: Optional[List[float]] = None,
     ) -> None:
-        print("addPath starting:")
-        print(f"  selected: {selected}")
-        print(f"  pointList: {pointList}")
-        print(f"  burnList: {burnList}")
-        print(f"  timeList: {timeList}")
+        """
+        Draw a path and burns for a single spaceobject
+        """
         assert len(pointList) == len(pointList)
-        if timeList is not None:
-            assert len(timeList) == len(burnList)
         style = self.pathStyle
-        font = None
         if selected:
             style = self.pathSelectedStyle
-        if self.font != None:
-            if selected:
-                font = self.selectedFont
-            else:
-                font = self.font
         color = style.color
-        textcolor = style.textcolor
-        textbakcolor = style.textbakcolor
         width = style.width
-        showTimes = style.showTimes
+
+        ## draw the orbits right here
         pygame.draw.lines(self.image, color, False, pointList, width)
+
+        self._drawBurnPaths(selected, pointList, burnList)
+        self._drawTimes(selected, pointList, timeList)
+
+    def _drawBurnPaths(
+        self, selected: bool, pointList: List[Tuple[int, int]], burnList: List[float]
+    ) -> None:
+        """
+        Draw the little arrows for the burn
+        """
+        style = self.pathStyle
+        if selected:
+            style = self.pathSelectedStyle
         for i in range(0, len(burnList) - 1):
             if burnList[i] == 0.0:
                 continue
@@ -138,14 +105,32 @@ class FuturePathsView(pygame.sprite.Sprite):
             imgToBlit = pygame.transform.rotate(imgToBlit, rotation)
             self.image.blit(
                 imgToBlit,
-                (
-                    point[0] - style.arrowWidth // 2,
-                    point[1] - style.arrowLength // 2,
-                ),
+                (point[0] - style.arrowWidth // 2, point[1] - style.arrowLength // 2),
             )
 
-        if not showTimes:
+    def _drawTimes(
+        self,
+        selected: bool,
+        pointList: List[Tuple[int, int]],
+        timeList: Optional[List[float]] = None,
+    ) -> None:
+        """
+        Show times around the orbit--does this work? Is it useful?
+        """
+        style = self.pathStyle
+        if selected:
+            style = self.pathSelectedStyle
+        if (timeList is None) or (not style.showTimes):
             return
+        assert len(timeList) == len(pointList)
+        font = None
+        if selected:
+            font = self.selectedFont
+        else:
+            font = self.font
+        textcolor = style.textcolor
+        textbakcolor = style.textbakcolor
+        showTimes = style.showTimes
         if (timeList is not None) and (font is not None):
             iTime = -1
             pointList = pointList[4:]
@@ -186,3 +171,39 @@ class FuturePathsView(pygame.sprite.Sprite):
                     textBakSurf.blit(textSurf, (0, 0))
                     textpos.center = pos
                 self.image.blit(textBakSurf, textpos)
+
+    def _prepareArrowImg(self) -> Tuple[pygame.surface.Surface, pygame.surface.Surface]:
+        """
+        Prepare some little triangles to be drawn to represent burns on future paths
+        """
+        maxArrowAxis = max(
+            self.pathSelectedStyle.arrowLength, self.pathSelectedStyle.arrowWidth
+        )
+        maxArrowAxis = max(maxArrowAxis, self.pathStyle.arrowLength)
+        maxArrowAxis = max(maxArrowAxis, self.pathStyle.arrowWidth)
+        maxArrowAxis = int(1.4 * maxArrowAxis)
+        arrowImgSize: Tuple[int, int] = (maxArrowAxis, maxArrowAxis)
+        arrowRect: pygame.rect.Rect = pygame.Rect((0, 0), arrowImgSize)
+        arrowImgSelected: pygame.surface.Surface = pygame.Surface(
+            arrowImgSize
+        ).convert_alpha()
+        arrowImg: pygame.surface.Surface = pygame.Surface(arrowImgSize).convert_alpha()
+        arrowImgSelected.fill((0, 0, 0, 0))
+        arrowImg.fill((0, 0, 0, 0))
+        x = arrowRect.centerx
+        y = arrowRect.centery
+        w2 = self.pathStyle.arrowWidth / 2
+        l2 = self.pathStyle.arrowLength / 2
+        pygame.draw.polygon(
+            arrowImg,
+            self.pathStyle.arrowColor,
+            [[x - w2, y + l2], [x + w2, y + l2], [x, y - l2]],
+        )
+        w2 = self.pathSelectedStyle.arrowWidth / 2
+        l2 = self.pathSelectedStyle.arrowLength / 2
+        pygame.draw.polygon(
+            arrowImgSelected,
+            self.pathSelectedStyle.arrowColor,
+            [[x - w2, y + l2], [x + w2, y + l2], [x, y - l2]],
+        )
+        return arrowImg, arrowImgSelected
